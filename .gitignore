@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Postgres Data
+postgres_data
+
+# Miscellaneous
+.DS_Store
