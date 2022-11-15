@@ -1,11 +1,13 @@
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import AllowAny
 from rest_framework.test import APITestCase
 
-from holistic_auth.auth import TokenAuthentication
+from holistic_auth.auth import BasicAuthentication, TokenAuthentication
+from holistic_auth.views import UserSerializer, UserDeserializer
 from holistic_auth.views import (
     LoginView,
     LogoutView,
-    LogoutAllView
+    LogoutAllView,
+    AccountView
 )
 
 
@@ -52,3 +54,30 @@ class TestLogoutAllView(APITestCase):
         expected = [TokenAuthentication]
 
         self.assertListEqual(actual, expected)
+
+
+class TestAccountView(APITestCase):
+    """
+    Test the `AccountView` class
+    """
+
+    def setUp(self):
+        self.view = AccountView()
+
+    def test_get_read_serializer_class(self):
+        self.assertEqual(
+            self.view.get_read_serializer_class(),
+            UserSerializer
+        )
+
+    def test_get_write_serializer_class(self):
+        self.assertEqual(
+            self.view.get_write_serializer_class(),
+            UserDeserializer
+        )
+
+    def test_get_permission(self):
+        permissions = self.view.get_permissions()
+
+        self.assertEqual(1, len(permissions))
+        self.assertIsInstance(permissions[0], AllowAny)
