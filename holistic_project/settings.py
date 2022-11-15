@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'knox',
+    'holistic_auth.apps.HolisticAuthConfig',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +89,7 @@ DATABASES = {
     }
 }
 
-# AUTH_USER_MODEL = 'holistic_auth.User'
+AUTH_USER_MODEL = 'holistic_auth.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -104,6 +108,23 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Authentication Token - Time to live settings
+# django-rest-knox
+
+REST_KNOX = {
+    'TOKEN_TTL': timedelta(days=1),  # default time 10h
+}
+
+#
+# Django REST Framework - Global Settings
+#
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('holistic_auth.auth.TokenAuthentication',),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',)
+}
 
 
 # Internationalization
