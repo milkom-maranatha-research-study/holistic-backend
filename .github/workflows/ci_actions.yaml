@@ -1,0 +1,24 @@
+name: CI - Code Quality Check and Tests
+
+on: push
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker Container
+        run: docker-compose up --build -d postgres web
+      - name: Setting up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9.14
+      - name: Setting up Flake8 Linter
+        run: |
+          pip install flake8==3.7.9
+      - name: Run Flake8 Linter
+        run: |
+          flake8 --ignore=E501,E271,E272,W602,W504 --exclude=submodules
+      - name: Run All Test
+        run: docker exec holistic-backend_web_1 ./manage.py test
