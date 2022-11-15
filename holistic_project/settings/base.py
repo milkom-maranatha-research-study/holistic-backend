@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'knox',
     'holistic_auth.apps.HolisticAuthConfig',
 ]
@@ -86,6 +87,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # django-rest-knox
 
 REST_KNOX = {
+    'USER_SERIALIZER': 'holistic_auth.serializers.UserSerializer',
     'TOKEN_TTL': timedelta(days=1),  # default time 10h
 }
 
