@@ -3,7 +3,8 @@ from django.urls import path
 from holistic_auth.views import (
     LoginView,
     LogoutView,
-    LogoutAllView
+    LogoutAllView,
+    AccountView
 )
 
 urlpatterns = [
@@ -22,4 +23,9 @@ urlpatterns = [
         LogoutAllView.as_view(),
         name='logout-all'
     ),
+    path(
+        'accounts/',
+        AccountView.as_view(),
+        name='create-account'
+    )
 ]
