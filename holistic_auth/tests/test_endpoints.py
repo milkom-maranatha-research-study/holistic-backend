@@ -110,3 +110,35 @@ class TestLogoutAllEndpoint(APITestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TestAccountEndpoint(APITestCase):
+    """
+    Test endpoint `/accounts/`
+    """
+
+    def setUp(self):
+        self.user = baker.make(User)
+        self.client.force_authenticate(self.user)
+
+        self.url = '/accounts/'
+
+    def test_post(self):
+        response = self.client.post(self.url)
+        self.assertNotEqual(response.status_code,
+                            status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_put(self):
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_delete(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
