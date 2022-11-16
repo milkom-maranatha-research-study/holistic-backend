@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'knox',
     'holistic_auth.apps.HolisticAuthConfig',
+    'holistic_organization.apps.HolisticOrganizationConfig',
 ]
 
 MIDDLEWARE = [
