@@ -45,12 +45,8 @@ class UserDeserializer(serializers.Serializer):
         return data
 
     def validate_password(self, value):
-        user = User(
-            username=self.initial_data['username'],
-            email=self.initial_data['email'],
-            first_name=self.initial_data['first_name'],
-            last_name=self.initial_data['last_name']
-        )
+        user = User(**self.initial_data)
+        user.password = None
 
         # Execute Django password validation
         validate_password(password=value, user=user)
@@ -59,11 +55,7 @@ class UserDeserializer(serializers.Serializer):
 
     def create(self, validated_data):
         try:
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password']
-            )
+            user = User.objects.create_user(**validated_data, is_active=False)
         except IntegrityError:
             raise ValidationError('Unable to create account.')
 
