@@ -4,7 +4,8 @@ from holistic_auth.views import (
     LoginView,
     LogoutView,
     LogoutAllView,
-    AccountView
+    AccountView,
+    AccountDetailView
 )
 
 urlpatterns = [
@@ -27,5 +28,10 @@ urlpatterns = [
         'accounts/',
         AccountView.as_view(),
         name='create-account'
+    ),
+    path(
+        'accounts/me/',
+        AccountDetailView.as_view(),
+        name='account-detail'
     )
 ]
