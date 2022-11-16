@@ -1,9 +1,8 @@
 from knox import views as knox_views
 from drf_rw_serializers import generics
 from rest_framework.permissions import AllowAny
-from rest_framework.authentication import BasicAuthentication
 
-from holistic_auth.auth import TokenAuthentication
+from holistic_auth.auth import BasicAuthentication, TokenAuthentication
 from holistic_auth.serializers import (
     UserSerializer,
     UserDeserializer

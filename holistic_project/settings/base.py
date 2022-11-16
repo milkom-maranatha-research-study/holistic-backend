@@ -65,6 +65,12 @@ WSGI_APPLICATION = 'holistic_project.wsgi.application'
 
 AUTH_USER_MODEL = 'holistic_auth.User'
 
+# Allowing inactive users to authenticate themselves
+# Removes this if User' activation through their email address is required
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.AllowAllUsersModelBackend'
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
