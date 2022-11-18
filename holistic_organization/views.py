@@ -26,7 +26,6 @@ class BaseSyncView(generics.CreateAPIView):
         deserializer.is_valid(raise_exception=True)
         deserializer.save()
 
-        print(deserializer.instance)
         serializer = self.get_read_serializer(deserializer.instance)
         return Response(serializer.data)
 

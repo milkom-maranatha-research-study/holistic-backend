@@ -74,11 +74,11 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
             for therapist in TherapistOrganization.objects.filter(organization_id=self.organization_id)
         ]
 
-        to_update_objects = self._get_therapists_to_update(therapist_list, existing_therapists)
-        to_create_objects = self._get_therapists_to_create(therapist_list, existing_therapists)
+        objects_to_update = self._get_therapists_to_update(therapist_list, existing_therapists)
+        objects_to_create = self._get_therapists_to_create(therapist_list, existing_therapists)
 
-        TherapistOrganization.objects.bulk_update(to_update_objects, fields=['date_joined'])
-        rows_created = len(TherapistOrganization.objects.bulk_create(to_create_objects))
+        TherapistOrganization.objects.bulk_update(objects_to_update, fields=['date_joined'])
+        rows_created = len(TherapistOrganization.objects.bulk_create(objects_to_create))
         rows_updated = len(therapist_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -139,7 +139,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
     def _get_pair_of_item(self, item, existing_therapists):
         """
         Returns a pair of (`item`, `TherapistOrganization`)
-        if the id of that therapist `item` exists on the list of existing therapists.
+        if that therapist `item` exists on the list of existing therapists.
 
         @param item: A dictionary that represents the Therapist within the payload data.
         @param existing_therapists: Existing therapists in the organization.
@@ -181,11 +181,11 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
             for interaction in TherapistInteraction.objects.filter(therapist_id=self.therapist_id)
         ]
 
-        to_update_objects = self._get_interactions_to_update(interaction_list, existing_interactions)
-        to_create_objects = self._get_interactions_to_create(interaction_list, existing_interactions)
+        objects_to_update = self._get_interactions_to_update(interaction_list, existing_interactions)
+        objects_to_create = self._get_interactions_to_create(interaction_list, existing_interactions)
 
-        TherapistInteraction.objects.bulk_update(to_update_objects, fields=['chat_count', 'call_count'])
-        rows_created = len(TherapistInteraction.objects.bulk_create(to_create_objects))
+        TherapistInteraction.objects.bulk_update(objects_to_update, fields=['chat_count', 'call_count'])
+        rows_created = len(TherapistInteraction.objects.bulk_create(objects_to_create))
         rows_updated = len(interaction_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -211,7 +211,8 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
 
     def _is_new_interaction(self, item, existing_interactions):
         """
-        Returns `True` if that interaction `item` doesn't exist in the list of therapist's interactions.
+        Returns `True` if the combination of unique ids of that interaction `item` exists
+        on the list of therapist's interactions.
 
         @param therapist_id: The therapist identifier.
         @param item: A dictionary that represents the therapist interaction within the payload data.
@@ -255,7 +256,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
     def _get_pair_of_item(self, item, existing_interactions):
         """
         Returns a pair of (`item`, `TherapistInteraction`)
-        if the associated unique ids of that interaction `item` exists
+        if the combination of unique ids of that interaction `item` exists
         on the list of therapist's interactions.
 
         @param item: A dictionary that represents the therapist interaction within the payload data.
