@@ -24,7 +24,7 @@ urlpatterns = [
         name='sync-organization-therapists'
     ),
     path(
-        'sync/therapists/<str:id>/interactions/',
+        'sync/organizations/therapists/<str:id>/interactions/',
         TherapistInteractionSyncView.as_view(),
         name='sync-therapist-interactions'
     ),

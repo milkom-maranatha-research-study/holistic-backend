@@ -56,7 +56,7 @@ Authorization: Token <AUTH TOKEN>
   ```
 
 ## Therapist’s Interactions API
-- `POST /sync/therapists/<id>/interactions/`
+- `POST /sync/organizations/therapists/<id>/interactions/`
   <br/><br/>Request Body:
 
   ```json
