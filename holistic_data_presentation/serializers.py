@@ -118,7 +118,7 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
                 continue
 
             item, total_therapist = list(pair)
-            total_therapist.period_type = item['period_type'],
+            total_therapist.period_type = item['period_type']
             total_therapist.value = item['value']
 
             objects_to_update.append(total_therapist)
@@ -264,7 +264,7 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
                 continue
 
             item, churn_retention_rate = list(pair)
-            churn_retention_rate.period_type = item['period_type'],
+            churn_retention_rate.period_type = item['period_type']
             churn_retention_rate.rate_value = item['rate_value']
 
             objects_to_update.append(churn_retention_rate)
