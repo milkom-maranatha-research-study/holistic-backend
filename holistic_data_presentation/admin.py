@@ -12,6 +12,7 @@ class NumberOfTherapistAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
+        'period_type',
         'start_date',
         'end_date',
         'is_active',
@@ -19,6 +20,7 @@ class NumberOfTherapistAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'organization',
+        'period_type',
         'start_date',
         'end_date',
     )
@@ -32,14 +34,16 @@ class ChurnRetentionRateAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
+        'period_type',
         'start_date',
         'end_date',
         'type',
         'rate_value',
     )
     list_filter = (
-        'type',
         'organization',
+        'type',
+        'period_type',
         'start_date',
         'end_date',
     )

@@ -9,6 +9,19 @@ class NumberOfTherapist(models.Model):
         on_delete=models.CASCADE
     )
 
+    TYPE_WEEKLY = 'weekly'
+    TYPE_MONTHLY = 'monthly'
+    TYPE_YEARLY = 'yearly'
+    PERIOD_CHOICES = (
+        (TYPE_WEEKLY, 'Weekly'),
+        (TYPE_MONTHLY, 'Monthly'),
+        (TYPE_YEARLY, 'Yearly'),
+    )
+    period_type = models.CharField(
+        max_length=8,
+        choices=PERIOD_CHOICES
+    )
+
     start_date = models.DateField()
     end_date = models.DateField()
 
@@ -31,6 +44,19 @@ class ChurnRetentionRate(models.Model):
     type = models.CharField(
         max_length=16,
         choices=TYPE_CHOICES
+    )
+
+    TYPE_WEEKLY = 'weekly'
+    TYPE_MONTHLY = 'monthly'
+    TYPE_YEARLY = 'yearly'
+    PERIOD_CHOICES = (
+        (TYPE_WEEKLY, 'Weekly'),
+        (TYPE_MONTHLY, 'Monthly'),
+        (TYPE_YEARLY, 'Yearly'),
+    )
+    period_type = models.CharField(
+        max_length=8,
+        choices=PERIOD_CHOICES
     )
 
     start_date = models.DateField()

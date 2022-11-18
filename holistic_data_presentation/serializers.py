@@ -16,6 +16,7 @@ class TotalTherapistSerializer(serializers.ModelSerializer):
     class Meta:
         model = NumberOfTherapist
         fields = (
+            'period_type',
             'organization',
             'start_date',
             'end_date',
@@ -29,6 +30,7 @@ class TotalTherapistOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = NumberOfTherapist
         fields = (
+            'period_type',
             'start_date',
             'end_date',
             'is_active',
@@ -58,7 +60,7 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
         to_update_objects = self._get_objects_to_update(total_therapist_list, existing_total_therapists)
         to_create_objects = self._get_objects_to_create(total_therapist_list, existing_total_therapists)
 
-        NumberOfTherapist.objects.bulk_update(to_update_objects, fields=['is_active', 'value'])
+        NumberOfTherapist.objects.bulk_update(to_update_objects, fields=['period_type', 'is_active', 'value'])
         rows_created = len(NumberOfTherapist.objects.bulk_create(to_create_objects))
         rows_updated = len(total_therapist_list) - rows_created
 
@@ -74,6 +76,7 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
         return [
             NumberOfTherapist(
                 organization_id=self.organization_id,
+                period_type=item['period_type'],
                 start_date=item['start_date'],
                 end_date=item['end_date'],
                 is_active=item['is_active'],
@@ -115,6 +118,7 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
                 continue
 
             item, total_therapist = list(pair)
+            total_therapist.period_type = item['period_type'],
             total_therapist.value = item['value']
 
             objects_to_update.append(total_therapist)
@@ -140,6 +144,9 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
 
 
 class TotalTherapistOrganizationDeserializer(serializers.Serializer):
+    period_type = serializers.ChoiceField(
+        choices=NumberOfTherapist.PERIOD_CHOICES
+    )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
     is_active = serializers.BooleanField()
@@ -154,6 +161,7 @@ class ChurnRetentionRateSerializer(serializers.ModelSerializer):
         model = ChurnRetentionRate
         fields = (
             'organization',
+            'period_type',
             'start_date',
             'end_date',
             'type',
@@ -166,6 +174,7 @@ class ChurnRetentionRateOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChurnRetentionRate
         fields = (
+            'period_type',
             'start_date',
             'end_date',
             'type',
@@ -196,7 +205,7 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
         to_update_objects = self._get_objects_to_update(churn_retention_rate_list, existing_churn_retention_rates)
         to_create_objects = self._get_objects_to_create(churn_retention_rate_list, existing_churn_retention_rates)
 
-        ChurnRetentionRate.objects.bulk_update(to_update_objects, fields=['rate_value'])
+        ChurnRetentionRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
         rows_created = len(ChurnRetentionRate.objects.bulk_create(to_create_objects))
         rows_updated = len(churn_retention_rate_list) - rows_created
 
@@ -213,6 +222,7 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
             ChurnRetentionRate(
                 organization_id=self.organization_id,
                 type=item['type'],
+                period_type=item['period_type'],
                 start_date=item['start_date'],
                 end_date=item['end_date'],
                 rate_value=item['rate_value']
@@ -254,6 +264,7 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
                 continue
 
             item, churn_retention_rate = list(pair)
+            churn_retention_rate.period_type = item['period_type'],
             churn_retention_rate.rate_value = item['rate_value']
 
             objects_to_update.append(churn_retention_rate)
@@ -280,7 +291,12 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
 
 
 class ChurnRetentionRateOrganizationDeserializer(serializers.Serializer):
-    type = serializers.ChoiceField(choices=ChurnRetentionRate.TYPE_CHOICES)
+    type = serializers.ChoiceField(
+        choices=ChurnRetentionRate.TYPE_CHOICES
+    )
+    period_type = serializers.ChoiceField(
+        choices=NumberOfTherapist.PERIOD_CHOICES
+    )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
     rate_value = serializers.FloatField()
