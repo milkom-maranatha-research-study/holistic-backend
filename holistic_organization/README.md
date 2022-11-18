@@ -1,7 +1,7 @@
 # API Documentation
 
 ## Authentication
-Any request to the API, needs to provide the following HTTP header.
+Any request to the API, needs to provide the following HTTP Header.
 
 ```
 Authorization: Token <AUTH TOKEN>
