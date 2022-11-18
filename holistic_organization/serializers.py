@@ -99,7 +99,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
             )
             for item in therapist_list if self._is_new_therapist(item, existing_therapists)
         ]
-    
+
     def _is_new_therapist(self, item, existing_therapists):
         """
         Returns `True` if that therapist `item` doesn't exist in the list of existing therapists.
@@ -208,7 +208,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
             )
             for item in interaction_list if self._is_new_interaction(item, existing_interactions)
         ]
-    
+
     def _is_new_interaction(self, item, existing_interactions):
         """
         Returns `True` if that interaction `item` doesn't exist in the list of therapist's interactions.
@@ -270,7 +270,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
                 return (item, interaction)
 
         return None
-        
+
 
 class TherapistInteractionDeserializer(serializers.Serializer):
     interaction_id = serializers.IntegerField(min_value=1)
