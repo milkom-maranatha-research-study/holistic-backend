@@ -25,7 +25,13 @@ class TherapistOrganization(models.Model):
 
 
 class TherapistInteraction(models.Model):
+    interaction_id = models.PositiveIntegerField()
     therapist_id = models.CharField(max_length=32)
-    interaction_date = models.DateField()
     chat_count = models.PositiveIntegerField()
     call_count = models.PositiveIntegerField()
+    interaction_date = models.DateField()
+
+    class Meta:
+        unique_together = (
+            ('interaction_id', 'therapist_id', 'interaction_date'),
+        )
