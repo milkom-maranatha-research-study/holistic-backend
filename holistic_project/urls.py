@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('holistic_auth.urls')),
     path('', include('holistic_organization.urls')),
+    path('', include('holistic_data_presentation.urls')),
 ]

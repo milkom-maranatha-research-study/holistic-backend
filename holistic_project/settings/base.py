@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'knox',
     'holistic_auth.apps.HolisticAuthConfig',
     'holistic_organization.apps.HolisticOrganizationConfig',
+    'holistic_data_presentation.apps.HolisticDataPresentationConfig',
 ]
 
 MIDDLEWARE = [
