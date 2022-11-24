@@ -23,3 +23,10 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+
+
+# django-cors-headers
+# =============================================================
+# A list of DNS(s) that are allowed to talk to Backend directly
+
+CORS_ORIGIN_WHITELIST = ()

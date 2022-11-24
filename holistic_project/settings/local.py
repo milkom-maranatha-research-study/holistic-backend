@@ -23,3 +23,8 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+
+# django-cors-headers
+# =============================================================
+
+CORS_ORIGIN_ALLOW_ALL = True
