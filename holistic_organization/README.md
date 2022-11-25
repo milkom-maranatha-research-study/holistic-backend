@@ -61,14 +61,14 @@ Authorization: Token <AUTH TOKEN>
 
   ```json
   [
-    {"interaction_id":"1","interaction_date":"2018-06-08","chat_count":2,"call_count":0},
-    {"interaction_id":"1","interaction_date":"2018-06-13","chat_count":1,"call_count":0},
-    {"interaction_id":"2","interaction_date":"2018-06-13","chat_count":2,"call_count":0},
-    {"interaction_id":"1","interaction_date":"2018-06-14","chat_count":2,"call_count":13},
-    {"interaction_id":"2","interaction_date":"2018-06-14","chat_count":1,"call_count":0},
-    {"interaction_id":"3","interaction_date":"2018-06-14","chat_count":1,"call_count":0},
-    {"interaction_id":"1","interaction_date":"2018-06-15","chat_count":14,"call_count":0},
-    {"interaction_id":"1","interaction_date":"2018-06-16","chat_count":0,"call_count":0}
+    {"interaction_id":1,"interaction_date":"2018-06-08","chat_count":2,"call_count":0},
+    {"interaction_id":1,"interaction_date":"2018-06-13","chat_count":1,"call_count":0},
+    {"interaction_id":2,"interaction_date":"2018-06-13","chat_count":2,"call_count":0},
+    {"interaction_id":1,"interaction_date":"2018-06-14","chat_count":2,"call_count":13},
+    {"interaction_id":2,"interaction_date":"2018-06-14","chat_count":1,"call_count":0},
+    {"interaction_id":3,"interaction_date":"2018-06-14","chat_count":1,"call_count":0},
+    {"interaction_id":1,"interaction_date":"2018-06-15","chat_count":14,"call_count":0},
+    {"interaction_id":1,"interaction_date":"2018-06-16","chat_count":0,"call_count":0}
   ]
   ```
 
