@@ -2,6 +2,10 @@ from django.http import Http404
 from drf_rw_serializers import generics
 from rest_framework.response import Response
 
+from holistic_data_presentation.filters import (
+    TotalTherapistFilter,
+    ChurnRetentionRateFilter
+)
 from holistic_data_presentation.models import (
     NumberOfTherapist,
     ChurnRetentionRate
@@ -20,6 +24,7 @@ from holistic_data_presentation.serializers import (
 class BaseTotalTherapistView(generics.GenericAPIView):
     read_serializer_class = TotalTherapistSerializer
     queryset = NumberOfTherapist.objects.all().order_by('id')
+    filterset_class = TotalTherapistFilter
 
 
 class TotalTherapistListView(BaseTotalTherapistView, generics.ListAPIView):
@@ -65,6 +70,7 @@ class TotalTherapistPerOrganizationListView(BaseTotalTherapistView, generics.Lis
 class BaseChurnRetentionRateView(generics.GenericAPIView):
     read_serializer_class = ChurnRetentionRateSerializer
     queryset = ChurnRetentionRate.objects.all().order_by('id')
+    filterset_class = ChurnRetentionRateFilter
 
 
 class ChurnRetentionRateListView(BaseChurnRetentionRateView, generics.ListAPIView):

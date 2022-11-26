@@ -93,4 +93,3 @@ class ChurnRetentionRateFilter(BaseDataPresentationFilter):
     class Meta:
         model = ChurnRetentionRate
         fields = ('type',)
-
