@@ -28,6 +28,15 @@ class NumberOfTherapist(models.Model):
     is_active = models.BooleanField(default=False)
     value = models.PositiveIntegerField()
 
+    class Meta:
+        unique_together = (
+            'organization',
+            'start_date',
+            'end_date',
+            'period_type',
+            'is_active',
+        )
+
 
 class ChurnRetentionRate(models.Model):
     organization = models.ForeignKey(
@@ -63,3 +72,12 @@ class ChurnRetentionRate(models.Model):
     end_date = models.DateField()
 
     rate_value = models.FloatField()
+
+    class Meta:
+        unique_together = (
+            'organization',
+            'type',
+            'start_date',
+            'end_date',
+            'period_type',
+        )
