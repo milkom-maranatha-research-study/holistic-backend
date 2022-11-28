@@ -5,6 +5,11 @@ from holistic_data_presentation.models import (
     NumberOfTherapist,
     ChurnRetentionRate,
 )
+from holistic_data_presentation.validators import (
+    validate_weekly_period,
+    validate_monthly_period,
+    validate_yearly_period,
+)
 
 
 class BatchCreateSerializer(serializers.Serializer):
@@ -155,6 +160,25 @@ class TotalTherapistOrganizationDeserializer(serializers.Serializer):
     class Meta:
         list_serializer_class = TotalTherapistOrganizationBatchDeserializer
 
+    def validate(self, attrs):
+        """
+        Ensures the `period_type` carries correct `start_date` and `end_date`.
+        """
+        period_type = attrs['period_type']
+        start_date = attrs['start_date']
+        end_date = attrs['end_date']
+
+        if period_type == 'weekly':
+            validate_weekly_period(start_date, end_date)
+
+        elif period_type == 'monthly':
+            validate_monthly_period(start_date, end_date)
+
+        elif period_type == 'yearly':
+            validate_yearly_period(start_date, end_date)
+
+        return attrs
+
 
 class ChurnRetentionRateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -295,7 +319,7 @@ class ChurnRetentionRateOrganizationDeserializer(serializers.Serializer):
         choices=ChurnRetentionRate.TYPE_CHOICES
     )
     period_type = serializers.ChoiceField(
-        choices=NumberOfTherapist.PERIOD_CHOICES
+        choices=ChurnRetentionRate.PERIOD_CHOICES
     )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
@@ -303,3 +327,22 @@ class ChurnRetentionRateOrganizationDeserializer(serializers.Serializer):
 
     class Meta:
         list_serializer_class = ChurnRetentionRateOrganizationBatchDeserializer
+
+    def validate(self, attrs):
+        """
+        Ensures the `period_type` carries correct `start_date` and `end_date`.
+        """
+        period_type = attrs['period_type']
+        start_date = attrs['start_date']
+        end_date = attrs['end_date']
+
+        if period_type == 'weekly':
+            validate_weekly_period(start_date, end_date)
+
+        elif period_type == 'monthly':
+            validate_monthly_period(start_date, end_date)
+
+        elif period_type == 'yearly':
+            validate_yearly_period(start_date, end_date)
+
+        return attrs
