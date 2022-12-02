@@ -2,6 +2,7 @@ from django.urls import path
 
 from holistic_organization.views import (
     OrganizationListView,
+    OrganizationTherapistInteractionListView,
     OrganizationSyncView,
     TherapistOrganizationSyncView,
     TherapistInteractionSyncView,
@@ -12,6 +13,11 @@ urlpatterns = [
         'organizations/',
         OrganizationListView.as_view(),
         name='organizations'
+    ),
+    path(
+        'organizations/therapists-interactions/export/',
+        OrganizationTherapistInteractionListView.as_view(),
+        name='export-therapists-interactions-all-organization'
     ),
     path(
         'sync/organizations/',
