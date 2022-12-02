@@ -15,6 +15,56 @@ class OrganizationSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
+class OrganizationTherapistInteractionJSONSerializer(serializers.ModelSerializer):
+    organization_id = serializers.SerializerMethodField()
+    organization_date_joined = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TherapistInteraction
+        fields = (
+            'interaction_id',
+            'therapist_id',
+            'chat_count',
+            'call_count',
+            'interaction_date',
+            'organization_id',
+            'organization_date_joined',
+        )
+        read_only = fields
+
+    def get_organization_id(self, obj):
+        return obj.organization_id
+
+    def get_organization_date_joined(self, obj):
+        return obj.organization_date_joined
+
+
+class OrganizationTherapistInteractionCSVSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        org_date_joined = instance.organization_date_joined
+
+        return [
+            instance.interaction_id,
+            instance.therapist_id,
+            instance.chat_count,
+            instance.call_count,
+            instance.interaction_date.isoformat(),
+            instance.organization_id,
+            org_date_joined.isoformat() if org_date_joined else None
+        ]
+
+
+class OrganizationTherapistInteractionExportDeserializer(serializers.Serializer):
+    TYPE_JSON = 'json'
+    TYPE_CSV = 'csv'
+    FORMAT_CHOICES = (
+        (TYPE_JSON, 'JSON'),
+        (TYPE_CSV, 'CSV'),
+    )
+    format = serializers.ChoiceField(choices=FORMAT_CHOICES)
+
+
 class SyncSerializer(serializers.Serializer):
     rows_created = serializers.IntegerField()
     rows_updated = serializers.IntegerField(required=False)
