@@ -1,6 +1,5 @@
 import csv
 
-from django.db.models import OuterRef, Subquery
 from django.http import Http404, HttpResponse
 from drf_rw_serializers import generics
 from rest_framework import status
@@ -8,7 +7,6 @@ from rest_framework.response import Response
 
 from holistic_organization.models import (
     Organization,
-    TherapistOrganization,
     TherapistInteraction,
 )
 from holistic_organization.serializers import (
@@ -29,15 +27,7 @@ class OrganizationListView(generics.ListAPIView):
 
 
 class OrganizationTherapistInteractionListView(generics.CreateAPIView):
-
-    def get_queryset(self):
-        ther_org_qs = TherapistOrganization.objects.filter(therapist_id=OuterRef('therapist_id'))
-
-        organization_id = Subquery(ther_org_qs.values('organization')[:1])
-        organization_date_joined = Subquery(ther_org_qs.values('date_joined')[:1])
-
-        return TherapistInteraction.objects.all()\
-            .annotate(organization_id=organization_id).annotate(organization_date_joined=organization_date_joined)
+    queryset = TherapistInteraction.objects.join_with_organization().order_by('id')
 
     def post(self, request, *args, **kwargs):
 
