@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'django_filters',
+    'corsheaders',
     'knox',
     'holistic_auth.apps.HolisticAuthConfig',
     'holistic_organization.apps.HolisticOrganizationConfig',
