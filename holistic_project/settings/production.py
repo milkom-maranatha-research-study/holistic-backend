@@ -29,4 +29,4 @@ DATABASES = {
 # =============================================================
 # A list of DNS(s) that are allowed to talk to Backend directly
 
-CORS_ALLOWED_ORIGINS = []
+# CORS_ALLOWED_ORIGINS = [ ]
