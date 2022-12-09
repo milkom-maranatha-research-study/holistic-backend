@@ -85,7 +85,7 @@ class UserUpdateDeserializer(serializers.ModelSerializer):
             raise ValidationError('\'old_password\' is required to change your password.')
 
         if not self.instance.check_password(old_password):
-            raise ValidationError('You old password is incorrect.')
+            raise ValidationError('Your old password is incorrect.')
 
         # Ensures the new password is valid
         instance = deepcopy(self.instance)
