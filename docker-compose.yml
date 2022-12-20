@@ -4,15 +4,17 @@ services:
   web:
     build: .
     volumes:
-     - .:/holistic-backend
+      - .:/holistic-backend
     ports:
-     - "8080:8080"
+      - "8080:8080"
     links:
       - postgres:postgres
     depends_on:
       - postgres
     env_file:
       - .env.example
+    networks:
+      - holistic-net
 
   postgres:
     image: postgres:13-alpine
@@ -23,3 +25,10 @@ services:
     restart: always
     env_file:
       - .env.example
+    networks:
+      - holistic-net
+
+networks:
+  holistic-net:
+    name: holistic-net
+    driver: bridge
