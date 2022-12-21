@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import OuterRef, Subquery
+from django.db.models import F
 
 
 class Organization(models.Model):
@@ -12,20 +12,17 @@ class Organization(models.Model):
 
 
 class TherapistOrganization(models.Model):
+    id = models.CharField(max_length=32, primary_key=True)
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE
     )
-    therapist_id = models.CharField(max_length=32)
     date_joined = models.DateField()
 
     class Meta:
         unique_together = (
-            ('organization', 'therapist_id'),
+            ('id', 'organization'),
         )
-        indexes = [
-            models.Index(fields=['organization_id', 'therapist_id']),
-        ]
 
 
 class TherapistInteractionQuerySet(models.QuerySet):
@@ -34,15 +31,13 @@ class TherapistInteractionQuerySet(models.QuerySet):
         """
         Annotates the `self` queryset with `organization_id`.
         """
-        queryset = TherapistOrganization.objects.filter(therapist_id=OuterRef('therapist_id'))
-        return self.annotate(organization_id=Subquery(queryset.values('organization')[:1]))
+        return self.annotate(organization_id=F('therapist__organization_id'))
 
     def annotate_organization_date_joined(self):
         """
         Annotates the `self` queryset with `organization_date_joined`.
         """
-        queryset = TherapistOrganization.objects.filter(therapist_id=OuterRef('therapist_id'))
-        return self.annotate(organization_date_joined=Subquery(queryset.values('date_joined')[:1]))
+        return self.annotate(organization_date_joined=F('therapist__date_joined'))
 
     def join_with_organization(self):
         """
@@ -52,8 +47,11 @@ class TherapistInteractionQuerySet(models.QuerySet):
 
 
 class TherapistInteraction(models.Model):
+    therapist = models.ForeignKey(
+        TherapistOrganization,
+        on_delete=models.CASCADE
+    )
     interaction_id = models.PositiveIntegerField()
-    therapist_id = models.CharField(max_length=32)
     chat_count = models.PositiveIntegerField()
     call_count = models.PositiveIntegerField()
     interaction_date = models.DateField()
@@ -62,9 +60,5 @@ class TherapistInteraction(models.Model):
 
     class Meta:
         unique_together = (
-            ('interaction_id', 'therapist_id', 'interaction_date'),
+            ('therapist', 'interaction_date', 'interaction_id'),
         )
-        indexes = [
-            models.Index(fields=['id', 'therapist_id']),
-            models.Index(fields=['therapist_id', 'interaction_date']),
-        ]
