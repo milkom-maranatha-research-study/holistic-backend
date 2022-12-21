@@ -1,6 +1,4 @@
-import csv
-
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from drf_rw_serializers import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -11,14 +9,15 @@ from holistic_organization.models import (
 )
 from holistic_organization.serializers import (
     OrganizationSerializer,
-    OrganizationTherapistInteractionJSONSerializer,
-    OrganizationTherapistInteractionCSVSerializer,
-    OrganizationTherapistInteractionExportDeserializer,
+    JSONExportSerializer,
+    CSVExportSerializer,
+    ExportDeserializer,
     OrganizationDeserializer,
     SyncSerializer,
     TherapistOrganizationDeserializer,
     TherapistInteractionDeserializer,
 )
+from holistic_organization.writers import CSVStream
 
 
 class OrganizationListView(generics.ListAPIView):
@@ -27,63 +26,45 @@ class OrganizationListView(generics.ListAPIView):
 
 
 class OrganizationTherapistInteractionListView(generics.CreateAPIView):
-    queryset = TherapistInteraction.objects.join_with_organization().order_by('id')
+
+    def get_queryset(self):
+        return TherapistInteraction.objects.annotate_organization_id()\
+            .annotate_organization_date_joined().order_by('id')
 
     def post(self, request, *args, **kwargs):
-
-        deserializer = OrganizationTherapistInteractionExportDeserializer(data=request.data)
+        deserializer = ExportDeserializer(data=request.data)
         deserializer.is_valid(raise_exception=True)
 
         format = deserializer.validated_data['format']
         filename = 'therapists_interactions'
 
         if format == 'json':
-            return self._get_response_json(filename)
+            serializer = JSONExportSerializer(self.get_queryset(), many=True)
+
+            response = Response(serializer.data)
+            response['Content-Disposition'] = f"attachment; filename={filename}.json"
+
+            return response
 
         elif format == 'csv':
-            return self._get_response_csv(filename)
+            headers = [
+                'interaction_id', 'therapist_id', 'chat_count', 'call_count',
+                'interaction_date', 'organization_id', 'organization_date_joined'
+            ]
+
+            csv_stream = CSVStream()
+
+            return csv_stream.export(
+                filename, headers, self.get_queryset().iterator(), CSVExportSerializer
+            )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def _get_response_json(self, filename: str):
-
-        serializer = OrganizationTherapistInteractionJSONSerializer(self.get_queryset(), many=True)
-
-        return Response(
-            data=serializer.data,
-            content_type='application/json',
-            headers={'Content-Disposition': f'attachment; filename="{filename}.json"'},
-        )
-
-    def _get_response_csv(self, filename: str):
-
-        response = HttpResponse(
-            content_type='text/csv',
-            headers={'Content-Disposition': f'attachment; filename="{filename}.csv"'},
-        )
-
-        headers = [
-            'interaction_id', 'therapist_id', 'chat_count', 'call_count',
-            'interaction_date', 'organization_id', 'organization_date_joined'
-        ]
-
-        rows = [
-            OrganizationTherapistInteractionCSVSerializer().to_representation(instance)
-            for instance in self.get_queryset()
-        ]
-
-        writer = csv.writer(response)
-        writer.writerow(headers)
-        writer.writerows(rows)
-
-        return response
 
 
 class BaseSyncView(generics.CreateAPIView):
     read_serializer_class = SyncSerializer
 
     def post(self, request, *args, **kwargs):
-
         deserializer = self.get_write_serializer(data=request.data, many=True)
         deserializer.is_valid(raise_exception=True)
         deserializer.save()

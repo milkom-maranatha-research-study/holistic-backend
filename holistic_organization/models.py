@@ -40,12 +40,6 @@ class TherapistInteractionQuerySet(models.QuerySet):
         """
         return self.annotate(organization_date_joined=F('therapist__date_joined'))
 
-    def join_with_organization(self):
-        """
-        Annotates the `self` queryset with `organization_id` and `organization_date_joined`.
-        """
-        return self.annotate_organization_id().annotate_organization_date_joined()
-
 
 class TherapistInteraction(models.Model):
     therapist = models.ForeignKey(
