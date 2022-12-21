@@ -22,15 +22,15 @@ class OrganizationAdmin(admin.ModelAdmin):
 @admin.register(TherapistOrganization)
 class TherapistOrganizationAdmin(admin.ModelAdmin):
     list_display = (
-        'therapist_id',
+        'id',
         'organization',
         'date_joined',
     )
-    list_filter = ('therapist_id', 'organization',)
+    list_filter = ('id', 'organization',)
     list_per_page = 25
     raw_id_fields = ('organization',)
     search_fields = (
-        'therapist_id',
+        'id',
         'organization__name',
     )
 
@@ -38,12 +38,12 @@ class TherapistOrganizationAdmin(admin.ModelAdmin):
 @admin.register(TherapistInteraction)
 class TherapistInteractionAdmin(admin.ModelAdmin):
     list_display = (
-        'therapist_id',
+        'therapist',
         'interaction_date',
         'interaction_id',
         'chat_count',
         'call_count',
     )
-    list_filter = ('therapist_id', 'interaction_date',)
+    list_filter = ('therapist', 'interaction_date',)
     list_per_page = 25
     search_fields = ('therapist_id',)
