@@ -15,9 +15,10 @@ class TherapistOrganization(models.Model):
     id = models.CharField(max_length=32, primary_key=True)
     organization = models.ForeignKey(
         Organization,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True
     )
-    date_joined = models.DateField()
+    date_joined = models.DateField(null=True)
 
     class Meta:
         unique_together = (
