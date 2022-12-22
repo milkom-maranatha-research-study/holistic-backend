@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from holistic_data_presentation.models import (
     NumberOfTherapist,
-    ChurnRetentionRate,
+    OrganizationRate,
 )
 
 
@@ -85,11 +85,11 @@ class TotalTherapistFilter(BaseDataPresentationFilter):
         fields = ('is_active',)
 
 
-class ChurnRetentionRateFilter(BaseDataPresentationFilter):
+class OrganizationRateFilter(BaseDataPresentationFilter):
     type = filters.CharFilter(
         field_name='type'
     )
 
     class Meta:
-        model = ChurnRetentionRate
+        model = OrganizationRate
         fields = ('type',)

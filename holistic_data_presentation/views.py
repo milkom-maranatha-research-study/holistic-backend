@@ -4,20 +4,19 @@ from rest_framework.response import Response
 
 from holistic_data_presentation.filters import (
     TotalTherapistFilter,
-    ChurnRetentionRateFilter
+    OrganizationRateFilter
 )
 from holistic_data_presentation.models import (
     NumberOfTherapist,
-    ChurnRetentionRate
+    OrganizationRate
 )
 from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
     TotalTherapistSerializer,
     TotalTherapistOrganizationDeserializer,
     TotalTherapistOrganizationSerializer,
-    ChurnRetentionRateSerializer,
-    ChurnRetentionRateOrganizationDeserializer,
-    ChurnRetentionRateOrganizationSerializer,
+    OrganizationRateSerializer,
+    OrganizationRateDeserializer,
 )
 
 
@@ -31,7 +30,7 @@ class TotalTherapistListView(BaseTotalTherapistView, generics.ListAPIView):
     read_serializer_class = TotalTherapistSerializer
 
 
-class TotalTherapistPerOrganizationListView(BaseTotalTherapistView, generics.ListCreateAPIView):
+class TotalTherapistDetailView(BaseTotalTherapistView, generics.ListCreateAPIView):
     read_serializer_class = TotalTherapistOrganizationSerializer
     write_serializer_class = TotalTherapistOrganizationDeserializer
 
@@ -67,24 +66,22 @@ class TotalTherapistPerOrganizationListView(BaseTotalTherapistView, generics.Lis
         return Response(serializer.data)
 
 
-class BaseChurnRetentionRateView(generics.GenericAPIView):
-    read_serializer_class = ChurnRetentionRateSerializer
-    queryset = ChurnRetentionRate.objects.all().order_by('id')
-    filterset_class = ChurnRetentionRateFilter
+class BaseOrganizationRateView(generics.GenericAPIView):
+    read_serializer_class = OrganizationRateSerializer
+    queryset = OrganizationRate.objects.all().order_by('id')
+    filterset_class = OrganizationRateFilter
 
 
-class ChurnRetentionRateListView(BaseChurnRetentionRateView, generics.ListAPIView):
-    serializer_class = ChurnRetentionRateOrganizationSerializer
-    queryset = ChurnRetentionRate.objects.all().order_by('id')
+class OrganizationRateListView(BaseOrganizationRateView, generics.ListAPIView):
+    queryset = OrganizationRate.objects.all().order_by('id')
 
 
-class ChurnRetentionRatePerOrganizationListView(BaseChurnRetentionRateView, generics.ListCreateAPIView):
-    read_serializer_class = ChurnRetentionRateOrganizationSerializer
-    write_serializer_class = ChurnRetentionRateOrganizationDeserializer
+class OrganizationRateDetailView(BaseOrganizationRateView, generics.ListCreateAPIView):
+    write_serializer_class = OrganizationRateDeserializer
 
     def get_queryset(self):
         if not self.kwargs.get('id'):
-            return ChurnRetentionRate.objects.none()
+            return OrganizationRate.objects.none()
 
         return super().get_queryset().filter(organization_id=self.kwargs.get('id'))
 

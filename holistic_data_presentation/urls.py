@@ -2,30 +2,30 @@ from django.urls import path
 
 from holistic_data_presentation.views import (
     TotalTherapistListView,
-    TotalTherapistPerOrganizationListView,
-    ChurnRetentionRateListView,
-    ChurnRetentionRatePerOrganizationListView,
+    TotalTherapistDetailView,
+    OrganizationRateListView,
+    OrganizationRateDetailView,
 )
 
 urlpatterns = [
     path(
-        'data-presentation/number-of-therapists/',
+        'presentation/organizations/number-of-therapists/',
         TotalTherapistListView.as_view(),
-        name='data-presentation-total-therapists'
+        name='number-of-therapists-in-organizations'
     ),
     path(
-        'data-presentation/organizations/<int:id>/number-of-therapists/',
-        TotalTherapistPerOrganizationListView.as_view(),
-        name='data-presentation-total-therapists-per-org'
+        'presentation/organizations/<int:id>/number-of-therapists/',
+        TotalTherapistDetailView.as_view(),
+        name='number-of-therapists-per-organization'
     ),
     path(
-        'data-presentation/churn-retention-rates/',
-        ChurnRetentionRateListView.as_view(),
-        name='data-presentation-churn-retention-rates'
+        'presentation/organizations/rates/',
+        OrganizationRateListView.as_view(),
+        name='rates-organizations'
     ),
     path(
-        'data-presentation/organizations/<int:id>/churn-retention-rates/',
-        ChurnRetentionRatePerOrganizationListView.as_view(),
-        name='data-presentation-churn-retention-rates-per-org'
+        'presentation/organizations/<int:id>/rates/',
+        OrganizationRateDetailView.as_view(),
+        name='rates-per-organization'
     ),
 ]

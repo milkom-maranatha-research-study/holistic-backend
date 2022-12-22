@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from holistic_data_presentation.models import (
     NumberOfTherapist,
-    ChurnRetentionRate,
+    OrganizationRate,
 )
 from holistic_data_presentation.validators import (
     validate_weekly_period,
@@ -180,9 +180,9 @@ class TotalTherapistOrganizationDeserializer(serializers.Serializer):
         return attrs
 
 
-class ChurnRetentionRateSerializer(serializers.ModelSerializer):
+class OrganizationRateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChurnRetentionRate
+        model = OrganizationRate
         fields = (
             'organization',
             'period_type',
@@ -194,20 +194,7 @@ class ChurnRetentionRateSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class ChurnRetentionRateOrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ChurnRetentionRate
-        fields = (
-            'period_type',
-            'start_date',
-            'end_date',
-            'type',
-            'rate_value',
-        )
-        read_only = fields
-
-
-class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer):
+class OrganizationRateBatchDeserializer(serializers.ListSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -223,14 +210,14 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
         """
         existing_churn_retention_rates = [
             number_of_ther
-            for number_of_ther in ChurnRetentionRate.objects.filter(organization_id=self.organization_id)
+            for number_of_ther in OrganizationRate.objects.filter(organization_id=self.organization_id)
         ]
 
         to_update_objects = self._get_objects_to_update(churn_retention_rate_list, existing_churn_retention_rates)
         to_create_objects = self._get_objects_to_create(churn_retention_rate_list, existing_churn_retention_rates)
 
-        ChurnRetentionRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
-        rows_created = len(ChurnRetentionRate.objects.bulk_create(to_create_objects))
+        OrganizationRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
+        rows_created = len(OrganizationRate.objects.bulk_create(to_create_objects))
         rows_updated = len(churn_retention_rate_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -243,7 +230,7 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
         @param existing_churn_retention_rates: Existing churn/retention rates of the organization.
         """
         return [
-            ChurnRetentionRate(
+            OrganizationRate(
                 organization_id=self.organization_id,
                 type=item['type'],
                 period_type=item['period_type'],
@@ -314,19 +301,19 @@ class ChurnRetentionRateOrganizationBatchDeserializer(serializers.ListSerializer
         return None
 
 
-class ChurnRetentionRateOrganizationDeserializer(serializers.Serializer):
+class OrganizationRateDeserializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=ChurnRetentionRate.TYPE_CHOICES
+        choices=OrganizationRate.TYPE_CHOICES
     )
     period_type = serializers.ChoiceField(
-        choices=ChurnRetentionRate.PERIOD_CHOICES
+        choices=OrganizationRate.PERIOD_CHOICES
     )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
     rate_value = serializers.FloatField()
 
     class Meta:
-        list_serializer_class = ChurnRetentionRateOrganizationBatchDeserializer
+        list_serializer_class = OrganizationRateBatchDeserializer
 
     def validate(self, attrs):
         """

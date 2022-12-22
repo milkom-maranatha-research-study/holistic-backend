@@ -38,7 +38,7 @@ class NumberOfTherapist(models.Model):
         )
 
 
-class ChurnRetentionRate(models.Model):
+class OrganizationRate(models.Model):
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE

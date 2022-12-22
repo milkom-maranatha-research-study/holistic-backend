@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from holistic_data_presentation.models import (
     NumberOfTherapist,
-    ChurnRetentionRate
+    OrganizationRate
 )
 
 
@@ -29,8 +29,8 @@ class NumberOfTherapistAdmin(admin.ModelAdmin):
     search_fields = ('organization__name',)
 
 
-@admin.register(ChurnRetentionRate)
-class ChurnRetentionRateAdmin(admin.ModelAdmin):
+@admin.register(OrganizationRate)
+class OrganizationRateAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',

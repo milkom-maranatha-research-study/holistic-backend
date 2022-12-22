@@ -8,7 +8,7 @@ Authorization: Token <AUTH TOKEN>
 ```
 
 ## Number of Therapist API
-- `GET /data-presentation/number-of-therapists/`
+- `GET /data-presentation/organizations/number-of-therapists/`
   <br/><br/>The `NumberOfTherapist` data object has the following format:
   ```json
   {
@@ -51,8 +51,8 @@ Authorization: Token <AUTH TOKEN>
   ```
 
 ## Churn/Retention Rate API
-- `GET /data-presentation/churn-retention-rates/`
-  <br/><br/>The `ChurnRateRetention` data object has the following format:
+- `GET /data-presentation/organizations/rates/`
+  <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
   {
     "organization": 1,
@@ -63,8 +63,8 @@ Authorization: Token <AUTH TOKEN>
     "rate_value": 2.5
   }
   ```
-- `GET /data-presentation/organizations/1/churn-retention-rates/`
-  <br/><br/>The `ChurnRateRetention` data object has the following format:
+- `GET /data-presentation/organizations/<id>/rates/`
+  <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
   {
     "period_type": "weekly",
@@ -74,8 +74,8 @@ Authorization: Token <AUTH TOKEN>
     "rate_value": 1.5
   }
   ```
-- `POST /data-presentation/organizations/1/churn-retention-rates/`
-  <br/><br/>The `ChurnRateRetention` data object has the following format:
+- `POST /data-presentation/organizations/<id>/rates/`
+  <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
   [
     {"type": "churn_rate", "period_type": "weekly", "start_date":"2022-10-30", "end_date": "2022-11-05", "rate_value": 1.5},
