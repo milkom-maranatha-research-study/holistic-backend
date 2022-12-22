@@ -3,8 +3,8 @@ from django.contrib import admin
 
 from holistic_organization.models import (
     Organization,
-    TherapistOrganization,
-    TherapistInteraction
+    Therapist,
+    Interaction
 )
 
 
@@ -19,8 +19,8 @@ class OrganizationAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(TherapistOrganization)
-class TherapistOrganizationAdmin(admin.ModelAdmin):
+@admin.register(Therapist)
+class TherapistAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
@@ -35,12 +35,12 @@ class TherapistOrganizationAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(TherapistInteraction)
-class TherapistInteractionAdmin(admin.ModelAdmin):
+@admin.register(Interaction)
+class InteractionAdmin(admin.ModelAdmin):
     list_display = (
         'therapist',
         'interaction_date',
-        'interaction_id',
+        'counter',
         'chat_count',
         'call_count',
     )

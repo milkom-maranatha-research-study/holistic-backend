@@ -3,8 +3,8 @@ from rest_framework import serializers
 
 from holistic_organization.models import (
     Organization,
-    TherapistOrganization,
-    TherapistInteraction,
+    Therapist,
+    Interaction,
 )
 
 
@@ -21,11 +21,11 @@ class JSONExportSerializer(serializers.Serializer):
         org_date_joined = instance.organization_date_joined
 
         return {
-            "interaction_id": instance.interaction_id,
             "therapist_id": instance.therapist_id,
+            "interaction_date": instance.interaction_date.isoformat(),
+            "counter": instance.counter,
             "chat_count": instance.chat_count,
             "call_count": instance.call_count,
-            "interaction_date": instance.interaction_date.isoformat(),
             "organization_id": instance.organization_id,
             "organization_date_joined": org_date_joined.isoformat() if org_date_joined else None
         }
@@ -37,11 +37,11 @@ class CSVExportSerializer(serializers.Serializer):
         org_date_joined = instance.organization_date_joined
 
         return [
-            instance.interaction_id,
             instance.therapist_id,
+            instance.interaction_date.isoformat(),
+            instance.counter,
             instance.chat_count,
             instance.call_count,
-            instance.interaction_date.isoformat(),
             instance.organization_id,
             org_date_joined.isoformat() if org_date_joined else None
         ]
@@ -113,14 +113,14 @@ class TherapistBatchDeserializer(serializers.ListSerializer):
         """
         existing_org_therapists = [
             therapist
-            for therapist in TherapistOrganization.objects.filter(organization_id=self.organization_id)
+            for therapist in Therapist.objects.filter(organization_id=self.organization_id)
         ]
 
         objects_to_update = self._get_therapists_to_update(therapist_list, existing_org_therapists)
         objects_to_create = self._get_therapists_to_create(therapist_list, existing_org_therapists)
 
-        TherapistOrganization.objects.bulk_update(objects_to_update, fields=['date_joined'])
-        rows_created = len(TherapistOrganization.objects.bulk_create(objects_to_create))
+        Therapist.objects.bulk_update(objects_to_update, fields=['date_joined'])
+        rows_created = len(Therapist.objects.bulk_create(objects_to_create))
         rows_updated = len(therapist_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -134,7 +134,7 @@ class TherapistBatchDeserializer(serializers.ListSerializer):
         @param org_therapists: Existing therapists in the organization.
         """
         return [
-            TherapistOrganization(
+            Therapist(
                 id=item['therapist_id'],
                 organization_id=self.organization_id,
                 date_joined=item['date_joined']
@@ -221,7 +221,7 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
         # 1. Find objects to be created / updated
         existing_interactions = [
             interaction
-            for interaction in TherapistInteraction.objects.filter(therapist_id=self.therapist_id)
+            for interaction in Interaction.objects.filter(therapist_id=self.therapist_id)
         ]
 
         objects_to_update = self._get_interactions_to_update(interaction_list, existing_interactions)
@@ -235,7 +235,7 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
 
         if objects_to_create:
 
-            existing_ther_ids = TherapistOrganization.objects.filter(
+            existing_ther_ids = Therapist.objects.filter(
                 id__in=[o.therapist_id for o in objects_to_create]
             ).values_list('id', flat=True)
 
@@ -245,13 +245,13 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
             ])
 
         if unknown_ther_ids:
-            TherapistOrganization.objects.bulk_create(
-                [TherapistOrganization(id=ther_id)for ther_id in unknown_ther_ids]
+            Therapist.objects.bulk_create(
+                [Therapist(id=ther_id)for ther_id in unknown_ther_ids]
             )
 
         # 3. Perform bulk operation to upsert `TherapistInteraction` objects
-        TherapistInteraction.objects.bulk_update(objects_to_update, fields=['chat_count', 'call_count'])
-        rows_created = len(TherapistInteraction.objects.bulk_create(objects_to_create))
+        Interaction.objects.bulk_update(objects_to_update, fields=['chat_count', 'call_count'])
+        rows_created = len(Interaction.objects.bulk_create(objects_to_create))
         rows_updated = len(interaction_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -265,10 +265,10 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
         @param existing_interactions: Existing therapist's interactions.
         """
         return [
-            TherapistInteraction(
+            Interaction(
                 therapist_id=self.therapist_id,
-                interaction_id=item['interaction_id'],
                 interaction_date=item['interaction_date'],
+                counter=item['counter'],
                 chat_count=item['chat_count'],
                 call_count=item['call_count']
             )
@@ -288,7 +288,7 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
             if bool(
                 self.therapist_id == interaction.therapist_id and
                 item['interaction_date'] == interaction.interaction_date and
-                item['interaction_id'] == interaction.interaction_id
+                item['counter'] == interaction.counter
             ):
                 return False
 
@@ -332,7 +332,7 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
             if bool(
                 self.therapist_id == interaction.therapist_id and
                 item['interaction_date'] == interaction.interaction_date and
-                item['interaction_id'] == interaction.interaction_id
+                item['counter'] == interaction.counter
             ):
                 return (item, interaction)
 
@@ -340,7 +340,7 @@ class InteractionBatchDeserializer(serializers.ListSerializer):
 
 
 class InteractionDeserializer(serializers.Serializer):
-    interaction_id = serializers.IntegerField(min_value=1)
+    counter = serializers.IntegerField(min_value=1)
     interaction_date = serializers.DateField()
     chat_count = serializers.IntegerField(min_value=0)
     call_count = serializers.IntegerField(min_value=0)

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from holistic_organization.models import (
     Organization,
-    TherapistInteraction,
+    Interaction,
 )
 from holistic_organization.serializers import (
     OrganizationSerializer,
@@ -28,7 +28,7 @@ class OrganizationListView(generics.ListAPIView):
 class TherapistInteractionListView(generics.CreateAPIView):
 
     def get_queryset(self):
-        return TherapistInteraction.objects.annotate_organization_id()\
+        return Interaction.objects.annotate_organization_id()\
             .annotate_organization_date_joined().order_by('id')
 
     def post(self, request, *args, **kwargs):
@@ -48,8 +48,8 @@ class TherapistInteractionListView(generics.CreateAPIView):
 
         elif format == 'csv':
             headers = [
-                'interaction_id', 'therapist_id', 'chat_count', 'call_count',
-                'interaction_date', 'organization_id', 'organization_date_joined'
+                'therapist_id', 'interaction_date', 'counter',
+                'chat_count', 'call_count', 'organization_id', 'organization_date_joined'
             ]
 
             csv_stream = CSVStream()

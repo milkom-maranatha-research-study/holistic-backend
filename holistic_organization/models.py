@@ -11,7 +11,7 @@ class Organization(models.Model):
     )
 
 
-class TherapistOrganization(models.Model):
+class Therapist(models.Model):
     id = models.CharField(max_length=32, primary_key=True)
     organization = models.ForeignKey(
         Organization,
@@ -26,7 +26,7 @@ class TherapistOrganization(models.Model):
         )
 
 
-class TherapistInteractionQuerySet(models.QuerySet):
+class InteractionQuerySet(models.QuerySet):
 
     def annotate_organization_id(self):
         """
@@ -41,19 +41,19 @@ class TherapistInteractionQuerySet(models.QuerySet):
         return self.annotate(organization_date_joined=F('therapist__date_joined'))
 
 
-class TherapistInteraction(models.Model):
+class Interaction(models.Model):
     therapist = models.ForeignKey(
-        TherapistOrganization,
+        Therapist,
         on_delete=models.CASCADE
     )
-    interaction_id = models.PositiveIntegerField()
+    interaction_date = models.DateField()
+    counter = models.PositiveIntegerField()
     chat_count = models.PositiveIntegerField()
     call_count = models.PositiveIntegerField()
-    interaction_date = models.DateField()
 
-    objects = TherapistInteractionQuerySet.as_manager()
+    objects = InteractionQuerySet.as_manager()
 
     class Meta:
         unique_together = (
-            ('therapist', 'interaction_date', 'interaction_id'),
+            ('therapist', 'interaction_date', 'counter'),
         )
