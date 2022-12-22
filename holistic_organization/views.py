@@ -14,8 +14,8 @@ from holistic_organization.serializers import (
     ExportDeserializer,
     OrganizationDeserializer,
     SyncSerializer,
-    TherapistOrganizationDeserializer,
-    TherapistInteractionDeserializer,
+    TherapistDeserializer,
+    InteractionDeserializer,
 )
 from holistic_organization.writers import CSVStream
 
@@ -25,7 +25,7 @@ class OrganizationListView(generics.ListAPIView):
     queryset = Organization.objects.all().order_by('id')
 
 
-class OrganizationTherapistInteractionListView(generics.CreateAPIView):
+class TherapistInteractionListView(generics.CreateAPIView):
 
     def get_queryset(self):
         return TherapistInteraction.objects.annotate_organization_id()\
@@ -77,8 +77,8 @@ class OrganizationSyncView(BaseSyncView):
     write_serializer_class = OrganizationDeserializer
 
 
-class TherapistOrganizationSyncView(BaseSyncView):
-    write_serializer_class = TherapistOrganizationDeserializer
+class TherapistSyncView(BaseSyncView):
+    write_serializer_class = TherapistDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -92,8 +92,8 @@ class TherapistOrganizationSyncView(BaseSyncView):
         return super().post(request, *args, **kwargs)
 
 
-class TherapistInteractionSyncView(BaseSyncView):
-    write_serializer_class = TherapistInteractionDeserializer
+class InteractionSyncView(BaseSyncView):
+    write_serializer_class = InteractionDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

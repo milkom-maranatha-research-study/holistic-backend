@@ -98,7 +98,7 @@ class OrganizationDeserializer(serializers.Serializer):
         list_serializer_class = OrganizationBatchDeserializer
 
 
-class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
+class TherapistBatchDeserializer(serializers.ListSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -127,7 +127,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
 
     def _get_therapists_to_create(self, therapist_list, org_therapists):
         """
-        Returns a list of `TherapistOrganization` objects that are going to be created
+        Returns a list of `Therapist` objects that are going to be created
         in batch.
 
         @param therapist_list: Validated JSON Array that contains a list of therapists.
@@ -157,7 +157,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
 
     def _get_therapists_to_update(self, therapist_list, org_therapists):
         """
-        Returns a list of `TherapistOrganization` objects that are going to be updated
+        Returns a list of `Therapist` objects that are going to be updated
         in batch.
 
         @param therapist_list: Validated JSON Array that contains a list of therapists.
@@ -180,7 +180,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
 
     def _get_pair_of_item(self, item, org_therapists):
         """
-        Returns a pair of (`item`, `TherapistOrganization`)
+        Returns a pair of (`item`, `Therapist`)
         if that therapist `item` exists on the list of existing therapists.
 
         @param item: A dictionary that represents the Therapist within the payload data.
@@ -193,7 +193,7 @@ class TherapistOrganizationBatchDeserializer(serializers.ListSerializer):
         return None
 
 
-class TherapistOrganizationDeserializer(serializers.Serializer):
+class TherapistDeserializer(serializers.Serializer):
     therapist_id = serializers.CharField(
         max_length=32,
         min_length=32
@@ -201,10 +201,10 @@ class TherapistOrganizationDeserializer(serializers.Serializer):
     date_joined = serializers.DateField()
 
     class Meta:
-        list_serializer_class = TherapistOrganizationBatchDeserializer
+        list_serializer_class = TherapistBatchDeserializer
 
 
-class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
+class InteractionBatchDeserializer(serializers.ListSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -227,10 +227,10 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
         objects_to_update = self._get_interactions_to_update(interaction_list, existing_interactions)
         objects_to_create = self._get_interactions_to_create(interaction_list, existing_interactions)
 
-        # 2. Special case when creating the therapist's interaction objects
-        # - We found therapist's interaction objects but they don't belongs to any Organization.
-        # - Therefore, we perform additional check and add that therapist to the `TherapistOrganization` table,
-        # - However, we leave both (`organization` and `date_joined`) to be empty.
+        # 2. Special case when creating new therapists' interaction objects
+        # - We found some interaction objects but the therapist who owned it doesn't belongs to any Organization.
+        # - Therefore, we perform additional check and add that therapist to the `Therapist` table,
+        #   But we leave both (`organization` and `date_joined`) to be empty.
         unknown_ther_ids = []
 
         if objects_to_create:
@@ -258,7 +258,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
 
     def _get_interactions_to_create(self, interaction_list, existing_interactions):
         """
-        Returns a list of `TherapistInteraction` objects that are going to be created
+        Returns a list of `Interaction` objects that are going to be created
         in batch.
 
         @param interaction_list: Validated JSON Array that contains a list of therapist's interactions.
@@ -296,7 +296,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
 
     def _get_interactions_to_update(self, interaction_list, existing_interactions):
         """
-        Returns a list of `TherapistInteraction` objects that are going to be updated
+        Returns a list of `Interaction` objects that are going to be updated
         in batch.
 
         @param therapist_id: The therapist identifier.
@@ -321,7 +321,7 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
 
     def _get_pair_of_item(self, item, existing_interactions):
         """
-        Returns a pair of (`item`, `TherapistInteraction`)
+        Returns a pair of (`item`, `Interaction`)
         if the combination of unique ids of that interaction `item` exists
         on the list of therapist's interactions.
 
@@ -339,11 +339,11 @@ class TherapistInteractionBatchDeserializer(serializers.ListSerializer):
         return None
 
 
-class TherapistInteractionDeserializer(serializers.Serializer):
+class InteractionDeserializer(serializers.Serializer):
     interaction_id = serializers.IntegerField(min_value=1)
     interaction_date = serializers.DateField()
     chat_count = serializers.IntegerField(min_value=0)
     call_count = serializers.IntegerField(min_value=0)
 
     class Meta:
-        list_serializer_class = TherapistInteractionBatchDeserializer
+        list_serializer_class = InteractionBatchDeserializer
