@@ -7,7 +7,9 @@ class AllTimeNumberOfTherapist(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(
+        null=True
+    )
     value = models.PositiveIntegerField()
 
     class Meta:
@@ -65,7 +67,8 @@ class AllTimeOrganizationRate(models.Model):
     )
     type = models.CharField(
         max_length=16,
-        choices=TYPE_CHOICES
+        choices=TYPE_CHOICES,
+        blank=True
     )
 
     rate_value = models.FloatField()
