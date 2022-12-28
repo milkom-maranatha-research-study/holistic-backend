@@ -3,8 +3,10 @@ from drf_rw_serializers import generics
 from rest_framework.response import Response
 
 from holistic_data_presentation.filters import (
+    AllTimeNumberOfTherapistFilter,
+    AllTimeOrganizationRateFilter,
     NumberOfTherapistFilter,
-    OrganizationRateFilter
+    OrganizationRateFilter,
 )
 from holistic_data_presentation.models import (
     AllTimeNumberOfTherapist,
@@ -26,6 +28,7 @@ from holistic_data_presentation.serializers import (
 class AllTimeNumberOfTherapistListView(generics.ListCreateAPIView):
     serializer_class = AllTimeNumberOfTherapistSerializer
     queryset = AllTimeNumberOfTherapist.objects.all().order_by('-end_date')
+    filterset_class = AllTimeNumberOfTherapistFilter
 
 
 class NumberOfTherapistListView(generics.ListAPIView):
@@ -58,6 +61,7 @@ class NumberOfTherapistDetailView(generics.CreateAPIView):
 class AllTimeOrganizationRateListView(generics.ListCreateAPIView):
     serializer_class = AllTimeOrganizationRateSerializer
     queryset = AllTimeOrganizationRate.objects.all().order_by('-end_date')
+    filterset_class = AllTimeOrganizationRateFilter
 
 
 class OrganizationRateListView(generics.ListAPIView):
