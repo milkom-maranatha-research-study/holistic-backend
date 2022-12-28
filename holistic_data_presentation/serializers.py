@@ -31,19 +31,6 @@ class NumberOfTherapistSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class TotalTherapistOrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NumberOfTherapist
-        fields = (
-            'period_type',
-            'start_date',
-            'end_date',
-            'is_active',
-            'value',
-        )
-        read_only = fields
-
-
 class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

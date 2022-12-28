@@ -14,45 +14,25 @@ from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
     NumberOfTherapistSerializer,
     TotalTherapistOrganizationDeserializer,
-    TotalTherapistOrganizationSerializer,
     OrganizationRateSerializer,
     OrganizationRateDeserializer,
 )
 
 
-class BaseTotalTherapistView(generics.GenericAPIView):
-    read_serializer_class = NumberOfTherapistSerializer
+class NumberOfTherapistListView(generics.ListAPIView):
+    serializer_class = NumberOfTherapistSerializer
     queryset = NumberOfTherapist.objects.all().order_by('id')
     filterset_class = NumberOfTherapistFilter
 
 
-class NumberOfTherapistListView(BaseTotalTherapistView, generics.ListAPIView):
-    read_serializer_class = NumberOfTherapistSerializer
-
-
-class NumberOfTherapistDetailView(BaseTotalTherapistView, generics.ListCreateAPIView):
-    read_serializer_class = TotalTherapistOrganizationSerializer
+class NumberOfTherapistDetailView(generics.CreateAPIView):
+    read_serializer_class = BatchCreateSerializer
     write_serializer_class = TotalTherapistOrganizationDeserializer
-
-    def get_queryset(self):
-        if not self.kwargs.get('id'):
-            return NumberOfTherapist.objects.none()
-
-        return super().get_queryset().filter(organization_id=self.kwargs.get('id'))
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-
-        if self.request.method == 'POST':
-            context['organization_id'] = self.kwargs.get('id')
-
+        context['organization_id'] = self.kwargs.get('id')
         return context
-
-    def get_read_serializer_class(self):
-        if self.request.method == 'POST':
-            return BatchCreateSerializer
-
-        return super().get_read_serializer_class()
 
     def post(self, request, *args, **kwargs):
         if not self.kwargs.get('id'):
@@ -66,38 +46,20 @@ class NumberOfTherapistDetailView(BaseTotalTherapistView, generics.ListCreateAPI
         return Response(serializer.data)
 
 
-class BaseOrganizationRateView(generics.GenericAPIView):
-    read_serializer_class = OrganizationRateSerializer
+class OrganizationRateListView(generics.ListAPIView):
+    serializer_class = OrganizationRateSerializer
     queryset = OrganizationRate.objects.all().order_by('id')
     filterset_class = OrganizationRateFilter
 
 
-class OrganizationRateListView(BaseOrganizationRateView, generics.ListAPIView):
-    queryset = OrganizationRate.objects.all().order_by('id')
-
-
-class OrganizationRateDetailView(BaseOrganizationRateView, generics.ListCreateAPIView):
+class OrganizationRateDetailView(generics.CreateAPIView):
+    read_serializer_class = BatchCreateSerializer
     write_serializer_class = OrganizationRateDeserializer
-
-    def get_queryset(self):
-        if not self.kwargs.get('id'):
-            return OrganizationRate.objects.none()
-
-        return super().get_queryset().filter(organization_id=self.kwargs.get('id'))
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-
-        if self.request.method == 'POST':
-            context['organization_id'] = self.kwargs.get('id')
-
+        context['organization_id'] = self.kwargs.get('id')
         return context
-
-    def get_read_serializer_class(self):
-        if self.request.method == 'POST':
-            return BatchCreateSerializer
-
-        return super().get_read_serializer_class()
 
     def post(self, request, *args, **kwargs):
         if not self.kwargs.get('id'):

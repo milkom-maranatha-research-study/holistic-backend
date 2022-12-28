@@ -8,7 +8,18 @@ from holistic_data_presentation.models import (
 )
 
 
-class BaseDataPresentationFilter(filters.FilterSet):
+class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
+    """
+    This class used for creating `IN` lookup filters with the `NumberFilter` class.
+    Therefore, it can validates that the incoming value is comma-separated and each values are numbers.
+
+    @see https://django-filter.readthedocs.io/en/stable/ref/filters.html?highlight=list#baseinfilter
+    """
+    pass
+
+
+class BaseFilter(filters.FilterSet):
+    organization = NumberInFilter(field_name='organization', lookup_expr='in')
 
     period_type = filters.CharFilter(
         method='filter_by_period_type'
@@ -75,7 +86,7 @@ class BaseDataPresentationFilter(filters.FilterSet):
         )
 
 
-class NumberOfTherapistFilter(BaseDataPresentationFilter):
+class NumberOfTherapistFilter(BaseFilter):
     is_active = filters.BooleanFilter(
         field_name='is_active'
     )
@@ -85,7 +96,7 @@ class NumberOfTherapistFilter(BaseDataPresentationFilter):
         fields = ('is_active',)
 
 
-class OrganizationRateFilter(BaseDataPresentationFilter):
+class OrganizationRateFilter(BaseFilter):
     type = filters.CharFilter(
         field_name='type'
     )
