@@ -15,7 +15,31 @@ class OrganizationSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class JSONExportSerializer(serializers.Serializer):
+class TherapistExportJSONSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        date_joined = instance.date_joined
+
+        return {
+            "therapist_id": instance.id,
+            "organization_id": instance.organization_id,
+            "organization_date_joined": date_joined.isoformat() if date_joined else None
+        }
+
+
+class TherapistExportCSVSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        date_joined = instance.date_joined
+
+        return [
+            instance.id,
+            instance.organization_id,
+            date_joined.isoformat() if date_joined else None
+        ]
+
+
+class InteractionExportJSONSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         org_date_joined = instance.organization_date_joined
@@ -31,7 +55,7 @@ class JSONExportSerializer(serializers.Serializer):
         }
 
 
-class CSVExportSerializer(serializers.Serializer):
+class InteractionExportCSVSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         org_date_joined = instance.organization_date_joined
