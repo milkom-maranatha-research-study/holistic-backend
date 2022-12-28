@@ -3,7 +3,7 @@ from drf_rw_serializers import generics
 from rest_framework.response import Response
 
 from holistic_data_presentation.filters import (
-    TotalTherapistFilter,
+    NumberOfTherapistFilter,
     OrganizationRateFilter
 )
 from holistic_data_presentation.models import (
@@ -12,7 +12,7 @@ from holistic_data_presentation.models import (
 )
 from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
-    TotalTherapistSerializer,
+    NumberOfTherapistSerializer,
     TotalTherapistOrganizationDeserializer,
     TotalTherapistOrganizationSerializer,
     OrganizationRateSerializer,
@@ -21,16 +21,16 @@ from holistic_data_presentation.serializers import (
 
 
 class BaseTotalTherapistView(generics.GenericAPIView):
-    read_serializer_class = TotalTherapistSerializer
+    read_serializer_class = NumberOfTherapistSerializer
     queryset = NumberOfTherapist.objects.all().order_by('id')
-    filterset_class = TotalTherapistFilter
+    filterset_class = NumberOfTherapistFilter
 
 
-class TotalTherapistListView(BaseTotalTherapistView, generics.ListAPIView):
-    read_serializer_class = TotalTherapistSerializer
+class NumberOfTherapistListView(BaseTotalTherapistView, generics.ListAPIView):
+    read_serializer_class = NumberOfTherapistSerializer
 
 
-class TotalTherapistDetailView(BaseTotalTherapistView, generics.ListCreateAPIView):
+class NumberOfTherapistDetailView(BaseTotalTherapistView, generics.ListCreateAPIView):
     read_serializer_class = TotalTherapistOrganizationSerializer
     write_serializer_class = TotalTherapistOrganizationDeserializer
 

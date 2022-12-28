@@ -75,7 +75,7 @@ class BaseDataPresentationFilter(filters.FilterSet):
         )
 
 
-class TotalTherapistFilter(BaseDataPresentationFilter):
+class NumberOfTherapistFilter(BaseDataPresentationFilter):
     is_active = filters.BooleanFilter(
         field_name='is_active'
     )

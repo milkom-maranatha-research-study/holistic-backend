@@ -17,7 +17,7 @@ class BatchCreateSerializer(serializers.Serializer):
     rows_updated = serializers.IntegerField(required=False)
 
 
-class TotalTherapistSerializer(serializers.ModelSerializer):
+class NumberOfTherapistSerializer(serializers.ModelSerializer):
     class Meta:
         model = NumberOfTherapist
         fields = (
