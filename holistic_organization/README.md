@@ -38,6 +38,20 @@ Authorization: Token <AUTH TOKEN>
   1,"2018-06-08",2,0,1,"2018-06-08"
   ```
 
+## Export Data API
+- `POST /organizations/therapists/export/`
+  <br/><br/>Request Body:
+
+  ```json
+  {"format": "csv|json"},
+  ```
+- `POST /organizations/therapists/interactions/export/`
+  <br/><br/>Request Body:
+
+  ```json
+  {"format": "csv|json"},
+  ```
+
 ## Organization Synchronization API
 - `POST /sync/organizations/`
   <br/><br/>Request Body:
@@ -76,7 +90,7 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 
-## Therapist’s Interactions API
+## Therapist’s Interactions Synchronization API
 - `POST /sync/organizations/therapists/<id>/interactions/`
   <br/><br/>Request Body:
 

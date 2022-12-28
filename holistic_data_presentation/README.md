@@ -50,7 +50,7 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 
-## Churn/Retention Rate API
+## Organization Rate API
 - `GET /data-presentation/organizations/rates/`
   <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
