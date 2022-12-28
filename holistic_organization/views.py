@@ -4,18 +4,21 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from holistic_organization.models import (
-    Organization,
     Interaction,
+    Organization,
+    Therapist
 )
 from holistic_organization.serializers import (
-    OrganizationSerializer,
-    JSONExportSerializer,
-    CSVExportSerializer,
     ExportDeserializer,
+    InteractionExportCSVSerializer,
+    InteractionExportJSONSerializer,
+    InteractionDeserializer,
     OrganizationDeserializer,
+    OrganizationSerializer,
     SyncSerializer,
     TherapistDeserializer,
-    InteractionDeserializer,
+    TherapistExportCSVSerializer,
+    TherapistExportJSONSerializer,
 )
 from holistic_organization.writers import CSVStream
 
@@ -25,7 +28,42 @@ class OrganizationListView(generics.ListAPIView):
     queryset = Organization.objects.all().order_by('id')
 
 
-class TherapistInteractionListView(generics.CreateAPIView):
+class TherapistListView(generics.CreateAPIView):
+    queryset = Therapist.objects.all().order_by('id')
+
+    def post(self, request, *args, **kwargs):
+        deserializer = ExportDeserializer(data=request.data)
+        deserializer.is_valid(raise_exception=True)
+
+        format = deserializer.validated_data['format']
+        filename = 'therapists'
+
+        if format == 'json':
+            serializer = TherapistExportJSONSerializer(
+                self.get_queryset(),
+                many=True
+            )
+
+            response = Response(serializer.data)
+            response['Content-Disposition'] = f"attachment; filename={filename}.json"
+
+            return response
+
+        elif format == 'csv':
+            csv_stream = CSVStream()
+
+            return csv_stream.export(
+                filename,
+                ['id', 'organization_id', 'date_joined'],
+                self.get_queryset().iterator(),
+                TherapistExportCSVSerializer
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class InteractionListView(generics.CreateAPIView):
 
     def get_queryset(self):
         return Interaction.objects.annotate_organization_id()\
@@ -39,7 +77,10 @@ class TherapistInteractionListView(generics.CreateAPIView):
         filename = 'therapists_interactions'
 
         if format == 'json':
-            serializer = JSONExportSerializer(self.get_queryset(), many=True)
+            serializer = InteractionExportJSONSerializer(
+                self.get_queryset(),
+                many=True
+            )
 
             response = Response(serializer.data)
             response['Content-Disposition'] = f"attachment; filename={filename}.json"
@@ -49,13 +90,17 @@ class TherapistInteractionListView(generics.CreateAPIView):
         elif format == 'csv':
             headers = [
                 'therapist_id', 'interaction_date', 'counter',
-                'chat_count', 'call_count', 'organization_id', 'organization_date_joined'
+                'chat_count', 'call_count', 'organization_id',
+                'organization_date_joined'
             ]
 
             csv_stream = CSVStream()
 
             return csv_stream.export(
-                filename, headers, self.get_queryset().iterator(), CSVExportSerializer
+                filename,
+                headers,
+                self.get_queryset().iterator(),
+                InteractionExportCSVSerializer
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
