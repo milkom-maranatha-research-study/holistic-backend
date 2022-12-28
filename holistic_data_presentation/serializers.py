@@ -2,6 +2,8 @@ from django.db import transaction
 from rest_framework import serializers
 
 from holistic_data_presentation.models import (
+    AllTimeNumberOfTherapist,
+    AllTimeOrganizationRate,
     NumberOfTherapist,
     OrganizationRate,
 )
@@ -15,6 +17,17 @@ from holistic_data_presentation.validators import (
 class BatchCreateSerializer(serializers.Serializer):
     rows_created = serializers.IntegerField()
     rows_updated = serializers.IntegerField(required=False)
+
+
+class AllTimeNumberOfTherapistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllTimeNumberOfTherapist
+        fields = (
+            'start_date',
+            'end_date',
+            'is_active',
+            'value',
+        )
 
 
 class NumberOfTherapistSerializer(serializers.ModelSerializer):
@@ -31,7 +44,7 @@ class NumberOfTherapistSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
+class NumberOfTherapistBatchDeserializer(serializers.ListSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -135,7 +148,7 @@ class TotalTherapistOrganizationBatchDeserializer(serializers.ListSerializer):
         return None
 
 
-class TotalTherapistOrganizationDeserializer(serializers.Serializer):
+class NumberOfTherapistDeserializer(serializers.Serializer):
     period_type = serializers.ChoiceField(
         choices=NumberOfTherapist.PERIOD_CHOICES
     )
@@ -145,7 +158,7 @@ class TotalTherapistOrganizationDeserializer(serializers.Serializer):
     value = serializers.IntegerField()
 
     class Meta:
-        list_serializer_class = TotalTherapistOrganizationBatchDeserializer
+        list_serializer_class = NumberOfTherapistBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -165,6 +178,17 @@ class TotalTherapistOrganizationDeserializer(serializers.Serializer):
             validate_yearly_period(start_date, end_date)
 
         return attrs
+
+
+class AllTimeOrganizationRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllTimeOrganizationRate
+        fields = (
+            'start_date',
+            'end_date',
+            'type',
+            'rate_value',
+        )
 
 
 class OrganizationRateSerializer(serializers.ModelSerializer):
