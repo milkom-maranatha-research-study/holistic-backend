@@ -3,6 +3,21 @@ from django.db import models
 from holistic_organization.models import Organization
 
 
+class AllTimeTherapist(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    is_active = models.BooleanField(default=False)
+    value = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = (
+            'start_date',
+            'end_date',
+            'is_active',
+        )
+
+
 class NumberOfTherapist(models.Model):
     organization = models.ForeignKey(
         Organization,
@@ -35,6 +50,31 @@ class NumberOfTherapist(models.Model):
             'end_date',
             'period_type',
             'is_active',
+        )
+
+
+class AllTimeOrganizationRate(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    TYPE_CHURN_RATE = 'churn_rate'
+    TYPE_RETENTION_RATE = 'retention_rate'
+    TYPE_CHOICES = (
+        (TYPE_CHURN_RATE, 'Churn Rate'),
+        (TYPE_RETENTION_RATE, 'Retention Rate'),
+    )
+    type = models.CharField(
+        max_length=16,
+        choices=TYPE_CHOICES
+    )
+
+    rate_value = models.FloatField()
+
+    class Meta:
+        unique_together = (
+            'start_date',
+            'end_date',
+            'type',
         )
 
 
