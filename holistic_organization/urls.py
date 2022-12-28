@@ -21,9 +21,9 @@ urlpatterns = [
         name='export-all-therapists'
     ),
     path(
-        'organizations/therapists/interactions/export/',
+        'organizations/interactions/export/',
         InteractionListView.as_view(),
-        name='export-therapists-interactions-all-organization'
+        name='export-all-interactions'
     ),
     path(
         'sync/organizations/',
