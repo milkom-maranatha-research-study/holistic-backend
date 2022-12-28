@@ -7,8 +7,41 @@ Any request to the API, needs to provide the following HTTP Header.
 Authorization: Token <AUTH TOKEN>
 ```
 
+## All-Time Number of Therapist API
+- `GET /number-of-therapists/all-time/`
+  <br/><br/>The `NumberOfTherapist` data object has the following format:
+  ```json
+  {
+    "start_date": "2022-10-30",
+    "end_date": "2022-11-05",
+    "is_active": true,
+    "value": 10
+  }
+  ```
+- `POST /number-of-therapists/all-time/`
+  <br/><br/>Request Body:
+
+  ```json
+  {
+    "start_date":"2022-10-30",
+    "end_date": "2022-11-05",
+    "is_active": true,
+    "value": 10
+  }
+  ```
+
+  Response data has the following format:
+  ```json
+  {
+    "start_date":"2022-10-30",
+    "end_date": "2022-11-05",
+    "is_active": true,
+    "value": 10
+  }
+  ```
+
 ## Number of Therapist API
-- `GET /data-presentation/organizations/number-of-therapists/`
+- `GET /number-of-therapists/`
   <br/><br/>The `NumberOfTherapist` data object has the following format:
   ```json
   {
@@ -20,18 +53,7 @@ Authorization: Token <AUTH TOKEN>
     "value": 10
   }
   ```
-- `GET /data-presentation/organizations/<id>/number-of-therapists/`
-  <br/><br/>The `NumberOfTherapist` data object has the following format:
-  ```json
-  {
-    "organization": 1,
-    "start_date": "2022-10-30",
-    "end_date": "2022-11-05",
-    "is_active": true,
-    "value": 10
-  }
-  ```
-- `POST /data-presentation/organizations/<id>/number-of-therapists/`
+- `POST /organizations/<id>/number-of-therapists/`
   <br/><br/>Request Body:
 
   ```json
@@ -50,8 +72,42 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 
+## All-Time Organization Rate API
+- `GET /rates/all-time/`
+  <br/><br/>The `NumberOfTherapist` data object has the following format:
+  ```json
+  {
+    "start_date": "2022-10-30",
+    "end_date": "2022-11-05",
+    "type": "churn_rate|retention_rate",
+    "rate_value": 0.10
+  }
+  ```
+- `POST /rates/all-time/`
+  <br/><br/>Request Body:
+
+  ```json
+  {
+    "start_date": "2022-10-30",
+    "end_date": "2022-11-05",
+    "type": "churn_rate|retention_rate",
+    "rate_value": 0.10
+  }
+  ```
+
+  Response data has the following format:
+  ```json
+  {
+    "start_date": "2022-10-30",
+    "end_date": "2022-11-05",
+    "type": "churn_rate|retention_rate",
+    "rate_value": 0.10
+  }
+  ```
+
+
 ## Organization Rate API
-- `GET /data-presentation/organizations/rates/`
+- `GET /rates/`
   <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
   {
@@ -63,18 +119,7 @@ Authorization: Token <AUTH TOKEN>
     "rate_value": 2.5
   }
   ```
-- `GET /data-presentation/organizations/<id>/rates/`
-  <br/><br/>The `OrganizationRate` data object has the following format:
-  ```json
-  {
-    "period_type": "weekly",
-    "start_date": "2022-10-30",
-    "end_date": "2022-11-05",
-    "type": "churn_rate",
-    "rate_value": 1.5
-  }
-  ```
-- `POST /data-presentation/organizations/<id>/rates/`
+- `POST /organizations/<id>/rates/`
   <br/><br/>The `OrganizationRate` data object has the following format:
   ```json
   [

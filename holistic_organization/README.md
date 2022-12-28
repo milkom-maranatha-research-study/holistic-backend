@@ -16,27 +16,6 @@ Authorization: Token <AUTH TOKEN>
     "name": "Organization 1"
   }
   ```
-- `POST /organizations/therapists/interactions/export/`
-  <br/><br/>Request Body:
-
-  ```json
-  {
-    "format": "csv|json"
-  }
-  ```
-
-  Response data of the JSON format:
-  ```json
-  [
-    {"counter":1,"interaction_date":"2018-06-08","chat_count":2,"call_count":0,"organization_id":1,"organization_date_joined":"2018-06-08"}
-  ]
-  ```
-
-  Response data of the CSV format:
-  ```
-  counter,interaction_date,chat_count,call_count,organization_id,organization_date_joined
-  1,"2018-06-08",2,0,1,"2018-06-08"
-  ```
 
 ## Export Data API
 - `POST /therapists/export/`
@@ -45,11 +24,49 @@ Authorization: Token <AUTH TOKEN>
   ```json
   {"format": "csv|json"},
   ```
+
+  Response data of the JSON format:
+  ```json
+  [
+    {
+      "therapist_id": "ther-id",
+      "organization_id":1,
+      "date_joined":"2018-06-08"
+    }
+  ]
+  ```
+
+  Response data of the CSV format:
+  ```
+  therapist_id,organization_id,date_joined
+  "ther-id",1,"2018-06-08"
+  ```
 - `POST /interactions/export/`
   <br/><br/>Request Body:
 
   ```json
   {"format": "csv|json"},
+  ```
+
+  Response data of the JSON format:
+  ```json
+  [
+    {
+      "therapist_id": "ther-id",
+      "interaction_date":"2018-06-08",
+      "counter":1,
+      "chat_count":2,
+      "call_count":0,
+      "organization_id":1,
+      "organization_date_joined":"2018-06-08"
+    }
+  ]
+  ```
+
+  Response data of the CSV format:
+  ```
+  therapist_id,interaction_date,counter,chat_count,call_count,organization_id,organization_date_joined
+  "ther-id","2018-06-08",1,2,0,1,"2018-06-08"
   ```
 
 ## Organization Synchronization API
