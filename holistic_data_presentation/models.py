@@ -3,7 +3,7 @@ from django.db import models
 from holistic_organization.models import Organization
 
 
-class AllTimeTherapist(models.Model):
+class AllTimeNumberOfTherapist(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
