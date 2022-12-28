@@ -39,13 +39,13 @@ Authorization: Token <AUTH TOKEN>
   ```
 
 ## Export Data API
-- `POST /organizations/therapists/export/`
+- `POST /therapists/export/`
   <br/><br/>Request Body:
 
   ```json
   {"format": "csv|json"},
   ```
-- `POST /organizations/therapists/interactions/export/`
+- `POST /interactions/export/`
   <br/><br/>Request Body:
 
   ```json
@@ -90,8 +90,8 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 
-## Therapist’s Interactions Synchronization API
-- `POST /sync/organizations/therapists/<id>/interactions/`
+## Interactions Synchronization API
+- `POST /sync/therapists/<id>/interactions/`
   <br/><br/>Request Body:
 
   ```json

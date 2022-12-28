@@ -16,12 +16,12 @@ urlpatterns = [
         name='organizations'
     ),
     path(
-        'organizations/therapists/export/',
+        'therapists/export/',
         TherapistListView.as_view(),
         name='export-all-therapists'
     ),
     path(
-        'organizations/interactions/export/',
+        'interactions/export/',
         InteractionListView.as_view(),
         name='export-all-interactions'
     ),
@@ -33,10 +33,10 @@ urlpatterns = [
     path(
         'sync/organizations/<int:id>/therapists/',
         TherapistSyncView.as_view(),
-        name='sync-organization-therapists'
+        name='sync-therapists-organization'
     ),
     path(
-        'sync/organizations/therapists/<str:id>/interactions/',
+        'sync/therapists/<str:id>/interactions/',
         InteractionSyncView.as_view(),
         name='sync-therapist-interactions'
     ),
