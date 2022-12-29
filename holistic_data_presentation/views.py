@@ -16,7 +16,9 @@ from holistic_data_presentation.models import (
 )
 from holistic_data_presentation.serializers import (
     AllTimeNumberOfTherapistSerializer,
+    AllTimeNumberOfTherapistDeserializer,
     AllTimeOrganizationRateSerializer,
+    AllTimeOrganizationRateDeserializer,
     BatchCreateSerializer,
     NumberOfTherapistSerializer,
     NumberOfTherapistDeserializer,
@@ -26,7 +28,8 @@ from holistic_data_presentation.serializers import (
 
 
 class AllTimeNumberOfTherapistListView(generics.ListCreateAPIView):
-    serializer_class = AllTimeNumberOfTherapistSerializer
+    read_serializer_class = AllTimeNumberOfTherapistSerializer
+    write_serializer_class = AllTimeNumberOfTherapistDeserializer
     queryset = AllTimeNumberOfTherapist.objects.all().order_by('-end_date')
     filterset_class = AllTimeNumberOfTherapistFilter
 
@@ -59,7 +62,8 @@ class NumberOfTherapistDetailView(generics.CreateAPIView):
 
 
 class AllTimeOrganizationRateListView(generics.ListCreateAPIView):
-    serializer_class = AllTimeOrganizationRateSerializer
+    read_serializer_class = AllTimeOrganizationRateSerializer
+    write_serializer_class = AllTimeOrganizationRateDeserializer
     queryset = AllTimeOrganizationRate.objects.all().order_by('-end_date')
     filterset_class = AllTimeOrganizationRateFilter
 
