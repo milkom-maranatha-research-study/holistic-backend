@@ -28,6 +28,44 @@ class AllTimeNumberOfTherapistSerializer(serializers.ModelSerializer):
             'is_active',
             'value',
         )
+        read_only = fields
+
+
+class AllTimeNumberOfTherapistDeserializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllTimeNumberOfTherapist
+        fields = (
+            'start_date',
+            'end_date',
+            'is_active',
+            'value',
+        )
+
+    def get_unique_together_validators(self):
+        """
+        Returns empty validators.
+
+        The unique together validators are applied on the database level.
+
+        However, we want to disable it on the deserializer level
+        because we perform `upsert` instead of `create` operation.
+        """
+        return []
+
+    def create(self, validated_data):
+        """
+        Upsert `AllTimeNumberOfTherapist` instance based on these fields
+        (`start_date`, `end_date`, `is_active`)
+        """
+        obj, _ = AllTimeNumberOfTherapist.objects.update_or_create(
+            value=validated_data['value'],
+            defaults={
+                'start_date': validated_data['start_date'],
+                'end_date': validated_data['end_date'],
+                'is_active': validated_data['is_active']
+            },
+        )
+        return obj
 
 
 class NumberOfTherapistSerializer(serializers.ModelSerializer):
@@ -51,32 +89,32 @@ class NumberOfTherapistBatchDeserializer(serializers.ListSerializer):
         self.organization_id = self.context['organization_id']
 
     @transaction.atomic
-    def create(self, total_therapist_list):
+    def create(self, num_of_therlist):
         """
         We override this method to implement upsert the number of therapists per Organization in batch.
 
-        @param total_therapist_list: Validated JSON Array that contains a list of number of therapists.
+        @param num_of_therlist: Validated JSON Array that contains a list of number of therapists.
         """
-        existing_total_therapists = [
+        existing_num_of_thers = [
             number_of_ther
             for number_of_ther in NumberOfTherapist.objects.filter(organization_id=self.organization_id)
         ]
 
-        to_update_objects = self._get_objects_to_update(total_therapist_list, existing_total_therapists)
-        to_create_objects = self._get_objects_to_create(total_therapist_list, existing_total_therapists)
+        to_update_objects = self._get_objects_to_update(num_of_therlist, existing_num_of_thers)
+        to_create_objects = self._get_objects_to_create(num_of_therlist, existing_num_of_thers)
 
         NumberOfTherapist.objects.bulk_update(to_update_objects, fields=['period_type', 'is_active', 'value'])
         rows_created = len(NumberOfTherapist.objects.bulk_create(to_create_objects))
-        rows_updated = len(total_therapist_list) - rows_created
+        rows_updated = len(num_of_therlist) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
 
-    def _get_objects_to_create(self, total_therapist_list, existing_total_therapists):
+    def _get_objects_to_create(self, num_of_ther_list, existing_num_of_thers):
         """
         Returns a list of `NumberOfTherapist` objects that are going to be created in batch.
 
-        @param total_therapist_list: Validated JSON Array that contains a list of number of therapists.
-        @param existing_total_therapists: Existing number of therapists belonging to the organization.
+        @param num_of_ther_list: Validated JSON Array that contains a list of number of therapists.
+        @param existing_num_of_thers: Existing number of therapists belonging to the organization.
         """
         return [
             NumberOfTherapist(
@@ -87,63 +125,67 @@ class NumberOfTherapistBatchDeserializer(serializers.ListSerializer):
                 is_active=item['is_active'],
                 value=item['value']
             )
-            for item in total_therapist_list if self._is_new_data(item, existing_total_therapists)
+            for item in num_of_ther_list if self._is_new_data(item, existing_num_of_thers)
         ]
 
-    def _is_new_data(self, item, existing_total_therapists):
+    def _is_new_data(self, item, existing_num_of_thers):
         """
         Returns `True` if that `item`'s period doesn't exist
         in the list of existing existing total therapists belonging to the organization.
 
         @param item: A dictionary that represents the number of therapist within the payload data.
-        @param existing_total_therapists: Existing number of therapists belonging to the organization.
+        @param existing_num_of_thers: Existing number of therapists belonging to the organization.
         """
-        for total_therapist in existing_total_therapists:
+        for num_of_ther in existing_num_of_thers:
             if bool(
-                item['start_date'] == total_therapist.start_date and
-                item['end_date'] == total_therapist.end_date
+                item['is_active'] == num_of_ther.is_active and
+                item['start_date'] == num_of_ther.start_date and
+                item['end_date'] == num_of_ther.end_date
             ):
                 return False
 
         return True
 
-    def _get_objects_to_update(self, total_therapist_list, existing_total_therapists):
+    def _get_objects_to_update(self, num_of_ther_list, existing_num_of_thers):
         """
         Returns a list of `NumberOfTherapist` objects that are going to be updated in batch.
 
-        @param total_therapist_list: Validated JSON Array that contains a list of number of therapists.
-        @param existing_total_therapists: Existing number of therapists belonging to the organization.
+        @param num_of_ther_list: Validated JSON Array that contains a list of number of therapists.
+        @param existing_num_of_thers: Existing number of therapists belonging to the organization.
         """
         objects_to_update = []
 
-        for item in total_therapist_list:
-            pair = self._get_pair_of_item(item, existing_total_therapists)
+        for item in num_of_ther_list:
+            pair = self._get_pair_of_item(item, existing_num_of_thers)
 
             if pair is None:
+                # That `item` doesn't exists,
+                # skip it from the update candidates.
                 continue
 
-            item, total_therapist = list(pair)
-            total_therapist.period_type = item['period_type']
-            total_therapist.value = item['value']
+            item, num_of_ther = list(pair)
+            num_of_ther.period_type = item['period_type']
+            num_of_ther.value = item['value']
 
-            objects_to_update.append(total_therapist)
+            objects_to_update.append(num_of_ther)
 
         return objects_to_update
 
-    def _get_pair_of_item(self, item, existing_total_therapists):
+    def _get_pair_of_item(self, item, existing_num_of_thers):
         """
         Returns a pair of (`item`, `NumberOfTherapist`)
         if the `item`'s period exists on the list of existing total therapists.
 
         @param item: A dictionary that represents the Therapist within the payload data.
-        @param existing_therapists: Existing therapists in the organization.
+        @param existing_num_of_thers: Existing number of therapists in the organization.
         """
-        for total_therapist in existing_total_therapists:
+        for num_of_ther in existing_num_of_thers:
             if bool(
-                item['start_date'] == total_therapist.start_date and
-                item['end_date'] == total_therapist.end_date
+                item['is_active'] == num_of_ther.is_active and
+                item['start_date'] == num_of_ther.start_date and
+                item['end_date'] == num_of_ther.end_date
             ):
-                return (item, total_therapist)
+                return (item, num_of_ther)
 
         return None
 
@@ -189,6 +231,44 @@ class AllTimeOrganizationRateSerializer(serializers.ModelSerializer):
             'type',
             'rate_value',
         )
+        read_only = fields
+
+
+class AllTimeOrganizationRateDeserializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllTimeOrganizationRate
+        fields = (
+            'start_date',
+            'end_date',
+            'type',
+            'rate_value',
+        )
+
+    def get_unique_together_validators(self):
+        """
+        Returns empty validators.
+
+        The unique together validators are applied on the database level.
+
+        However, we want to disable it on the deserializer level
+        because we perform `upsert` instead of `create` operation.
+        """
+        return []
+
+    def create(self, validated_data):
+        """
+        Upsert `AllTimeOrganizationRate` instance based on these fields
+        (`start_date`, `end_date`, `type`)
+        """
+        obj, _ = AllTimeOrganizationRate.objects.update_or_create(
+            rate_value=validated_data['rate_value'],
+            defaults={
+                'start_date': validated_data['start_date'],
+                'end_date': validated_data['end_date'],
+                'type': validated_data['type']
+            },
+        )
+        return obj
 
 
 class OrganizationRateSerializer(serializers.ModelSerializer):
@@ -213,32 +293,32 @@ class OrganizationRateBatchDeserializer(serializers.ListSerializer):
         self.organization_id = self.context['organization_id']
 
     @transaction.atomic
-    def create(self, churn_retention_rate_list):
+    def create(self, rate_list):
         """
-        We override this method to implement upsert the churn/retention rates per Organization in batch.
+        We override this method to implement upsert the rates of the Organization in batch.
 
-        @param churn_retention_rate_list: Validated JSON Array that contains a list of the churn/retention rates.
+        @param rate_list: Validated JSON Array that contains a list of the Organization rates.
         """
-        existing_churn_retention_rates = [
-            number_of_ther
-            for number_of_ther in OrganizationRate.objects.filter(organization_id=self.organization_id)
+        existing_rates = [
+            rate
+            for rate in OrganizationRate.objects.filter(organization_id=self.organization_id)
         ]
 
-        to_update_objects = self._get_objects_to_update(churn_retention_rate_list, existing_churn_retention_rates)
-        to_create_objects = self._get_objects_to_create(churn_retention_rate_list, existing_churn_retention_rates)
+        to_update_objects = self._get_objects_to_update(rate_list, existing_rates)
+        to_create_objects = self._get_objects_to_create(rate_list, existing_rates)
 
         OrganizationRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
         rows_created = len(OrganizationRate.objects.bulk_create(to_create_objects))
-        rows_updated = len(churn_retention_rate_list) - rows_created
+        rows_updated = len(rate_list) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
 
-    def _get_objects_to_create(self, churn_retention_rate_list, existing_churn_retention_rates):
+    def _get_objects_to_create(self, rate_list, existing_rates):
         """
-        Returns a list of `ChurnRetentionRate` objects that are going to be created in batch.
+        Returns a list of `OrganizationRate` objects that are going to be created in batch.
 
-        @param churn_retention_rate_list: Validated JSON Array that contains a list of the churn/retention rates.
-        @param existing_churn_retention_rates: Existing churn/retention rates of the organization.
+        @param rate_list: Validated JSON Array that contains a list of the organization rates.
+        @param existing_rates: Existing rates of the organization.
         """
         return [
             OrganizationRate(
@@ -249,65 +329,67 @@ class OrganizationRateBatchDeserializer(serializers.ListSerializer):
                 end_date=item['end_date'],
                 rate_value=item['rate_value']
             )
-            for item in churn_retention_rate_list if self._is_new_data(item, existing_churn_retention_rates)
+            for item in rate_list if self._is_new_data(item, existing_rates)
         ]
 
-    def _is_new_data(self, item, existing_churn_retention_rates):
+    def _is_new_data(self, item, existing_rates):
         """
         Returns `True` if that `item`'s type and period doesn't exist
-        in the list of existing churn/retention rate of the organization.
+        in the list of existing rates of the organization.
 
-        @param item: A dictionary that represents the churn/retention rate within the payload data.
-        @param existing_churn_retention_rates: Existing churn/retention rates of the organization.
+        @param item: A dictionary that represents the organization rate within the payload data.
+        @param existing_rates: Existing rates of the organization.
         """
-        for churn_retention_rate in existing_churn_retention_rates:
+        for rate in existing_rates:
             if bool(
-                item['type'] == churn_retention_rate.type and
-                item['start_date'] == churn_retention_rate.start_date and
-                item['end_date'] == churn_retention_rate.end_date
+                item['type'] == rate.type and
+                item['start_date'] == rate.start_date and
+                item['end_date'] == rate.end_date
             ):
                 return False
 
         return True
 
-    def _get_objects_to_update(self, churn_retention_rate_list, existing_churn_retention_rates):
+    def _get_objects_to_update(self, rate_list, existing_rates):
         """
-        Returns a list of `ChurnRetentionRate` objects that are going to be updated in batch.
+        Returns a list of `OrganizationRate` objects that are going to be updated in batch.
 
-        @param churn_retention_rate_list: Validated JSON Array that contains a list of the churn/retention rates.
-        @param existing_churn_retention_rates: Existing churn/retention rates of the organization.
+        @param rate_list: Validated JSON Array that contains a list of the organization rates.
+        @param existing_rates: Existing rates of the organization.
         """
         objects_to_update = []
 
-        for item in churn_retention_rate_list:
-            pair = self._get_pair_of_item(item, existing_churn_retention_rates)
+        for item in rate_list:
+            pair = self._get_pair_of_item(item, existing_rates)
 
             if pair is None:
+                # That `item` doesn't exists,
+                # skip it from the update candidates.
                 continue
 
-            item, churn_retention_rate = list(pair)
-            churn_retention_rate.period_type = item['period_type']
-            churn_retention_rate.rate_value = item['rate_value']
+            item, rate = list(pair)
+            rate.period_type = item['period_type']
+            rate.rate_value = item['rate_value']
 
-            objects_to_update.append(churn_retention_rate)
+            objects_to_update.append(rate)
 
         return objects_to_update
 
-    def _get_pair_of_item(self, item, existing_churn_retention_rates):
+    def _get_pair_of_item(self, item, existing_rates):
         """
-        Returns a pair of (`item`, `ChurnRetentionRate`)
-        if the `item`'s type and period doesn't exist on the list of existing total therapists.
+        Returns a pair of (`item`, `OrganizationRate`)
+        if the `item`'s type and period doesn't exist on the existing rates.
 
-        @param item: A dictionary that represents the churn/retention rate within the payload data.
-        @param existing_churn_retention_rates: Existing churn/retention rates of the organization.
+        @param item: A dictionary that represents the organization rate within the payload data.
+        @param existing_rates: Existing rates of the organization.
         """
-        for churn_retention_rate in existing_churn_retention_rates:
+        for rate in existing_rates:
             if bool(
-                item['type'] == churn_retention_rate.type and
-                item['start_date'] == churn_retention_rate.start_date and
-                item['end_date'] == churn_retention_rate.end_date
+                item['type'] == rate.type and
+                item['start_date'] == rate.start_date and
+                item['end_date'] == rate.end_date
             ):
-                return (item, churn_retention_rate)
+                return (item, rate)
 
         return None
 
