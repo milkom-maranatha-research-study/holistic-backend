@@ -1,43 +1,37 @@
 from django.urls import path
 
 from holistic_data_presentation.views import (
-    AllTimeNumberOfTherapistListView,
-    NumberOfTherapistListView,
-    NumberOfTherapistDetailView,
-    AllTimeOrganizationRateListView,
-    OrganizationRateListView,
-    OrganizationRateDetailView,
+    TherapistRateListView,
+    TherapistRateDetailView,
+    TotalAllTherapistListView,
+    TotalTherapistListView,
+    TotalTherapistDetailView,
 )
 
 urlpatterns = [
     path(
-        'number-of-therapists/',
-        NumberOfTherapistListView.as_view(),
-        name='number-of-therapists'
+        'total-therapists/',
+        TotalTherapistListView.as_view(),
+        name='total-therapists'
     ),
     path(
-        'number-of-therapists/all-time/',
-        AllTimeNumberOfTherapistListView.as_view(),
-        name='all-time-number-of-therapists'
+        'total-therapists/all/',
+        TotalAllTherapistListView.as_view(),
+        name='total-all-therapists'
     ),
     path(
-        'organizations/<int:id>/number-of-therapists/',
-        NumberOfTherapistDetailView.as_view(),
-        name='number-of-therapists-per-organization'
+        'organizations/<int:id>/total-therapists/',
+        TotalTherapistDetailView.as_view(),
+        name='total-therapists-per-organization'
     ),
     path(
         'rates/',
-        OrganizationRateListView.as_view(),
+        TherapistRateListView.as_view(),
         name='rates'
     ),
     path(
-        'rates/all-time/',
-        AllTimeOrganizationRateListView.as_view(),
-        name='all-time-rates'
-    ),
-    path(
         'organizations/<int:id>/rates/',
-        OrganizationRateDetailView.as_view(),
+        TherapistRateDetailView.as_view(),
         name='rates-per-organization'
     ),
 ]

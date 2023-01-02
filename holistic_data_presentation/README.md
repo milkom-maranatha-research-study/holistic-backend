@@ -8,8 +8,8 @@ Authorization: Token <AUTH TOKEN>
 ```
 
 ## All-Time Number of Therapist API
-- `GET /number-of-therapists/all-time/`
-  <br/><br/>The `NumberOfTherapist` data object has the following format:
+- `GET /total-therapists/all-time/`
+  <br/><br/>The `TotalTherapist` data object has the following format:
   ```json
   {
     "start_date": "2022-10-30",
@@ -18,7 +18,7 @@ Authorization: Token <AUTH TOKEN>
     "value": 10
   }
   ```
-- `POST /number-of-therapists/all-time/`
+- `POST /total-therapists/all-time/`
   <br/><br/>Request Body:
 
   ```json
@@ -41,8 +41,8 @@ Authorization: Token <AUTH TOKEN>
   ```
 
 ## Number of Therapist API
-- `GET /number-of-therapists/`
-  <br/><br/>The `NumberOfTherapist` data object has the following format:
+- `GET /total-therapists/`
+  <br/><br/>The `TotalTherapist` data object has the following format:
   ```json
   {
     "period_type": "weekly",
@@ -53,7 +53,7 @@ Authorization: Token <AUTH TOKEN>
     "value": 10
   }
   ```
-- `POST /organizations/<id>/number-of-therapists/`
+- `POST /organizations/<id>/total-therapists/`
   <br/><br/>Request Body:
 
   ```json
@@ -72,43 +72,10 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 
-## All-Time Organization Rate API
-- `GET /rates/all-time/`
-  <br/><br/>The `NumberOfTherapist` data object has the following format:
-  ```json
-  {
-    "start_date": "2022-10-30",
-    "end_date": "2022-11-05",
-    "type": "churn_rate|retention_rate",
-    "rate_value": 0.10
-  }
-  ```
-- `POST /rates/all-time/`
-  <br/><br/>Request Body:
-
-  ```json
-  {
-    "start_date": "2022-10-30",
-    "end_date": "2022-11-05",
-    "type": "churn_rate|retention_rate",
-    "rate_value": 0.10
-  }
-  ```
-
-  Response data has the following format:
-  ```json
-  {
-    "start_date": "2022-10-30",
-    "end_date": "2022-11-05",
-    "type": "churn_rate|retention_rate",
-    "rate_value": 0.10
-  }
-  ```
-
 
 ## Organization Rate API
 - `GET /rates/`
-  <br/><br/>The `OrganizationRate` data object has the following format:
+  <br/><br/>The `TherapistRate` data object has the following format:
   ```json
   {
     "organization": 1,
@@ -120,7 +87,7 @@ Authorization: Token <AUTH TOKEN>
   }
   ```
 - `POST /organizations/<id>/rates/`
-  <br/><br/>The `OrganizationRate` data object has the following format:
+  <br/><br/>The `TherapistRate` data object has the following format:
   ```json
   [
     {"type": "churn_rate", "period_type": "weekly", "start_date":"2022-10-30", "end_date": "2022-11-05", "rate_value": 1.5},

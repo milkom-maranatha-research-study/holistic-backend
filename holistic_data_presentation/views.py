@@ -3,46 +3,38 @@ from drf_rw_serializers import generics
 from rest_framework.response import Response
 
 from holistic_data_presentation.filters import (
-    AllTimeNumberOfTherapistFilter,
-    AllTimeOrganizationRateFilter,
-    NumberOfTherapistFilter,
-    OrganizationRateFilter,
+    TherapistRateFilter,
+    TotalTherapistFilter,
 )
 from holistic_data_presentation.models import (
-    AllTimeNumberOfTherapist,
-    AllTimeOrganizationRate,
-    NumberOfTherapist,
-    OrganizationRate,
+    TherapistRate,
+    TotalTherapist,
 )
 from holistic_data_presentation.serializers import (
-    AllTimeNumberOfTherapistSerializer,
-    AllTimeNumberOfTherapistDeserializer,
-    AllTimeOrganizationRateSerializer,
-    AllTimeOrganizationRateDeserializer,
     BatchCreateSerializer,
-    NumberOfTherapistSerializer,
-    NumberOfTherapistDeserializer,
-    OrganizationRateSerializer,
-    OrganizationRateDeserializer,
+    TherapistRateSerializer,
+    TherapistRateDeserializer,
+    TotalAllTherapistSerializer,
+    TotalAllTherapistDeserializer,
+    TotalTherapistSerializer,
+    TotalTherapistDeserializer,
 )
 
 
-class AllTimeNumberOfTherapistListView(generics.ListCreateAPIView):
-    read_serializer_class = AllTimeNumberOfTherapistSerializer
-    write_serializer_class = AllTimeNumberOfTherapistDeserializer
-    queryset = AllTimeNumberOfTherapist.objects.all().order_by('-end_date')
-    filterset_class = AllTimeNumberOfTherapistFilter
+class TotalAllTherapistListView(generics.CreateAPIView):
+    read_serializer_class = TotalAllTherapistSerializer
+    write_serializer_class = TotalAllTherapistDeserializer
 
 
-class NumberOfTherapistListView(generics.ListAPIView):
-    serializer_class = NumberOfTherapistSerializer
-    queryset = NumberOfTherapist.objects.all().order_by('id')
-    filterset_class = NumberOfTherapistFilter
+class TotalTherapistListView(generics.ListAPIView):
+    serializer_class = TotalTherapistSerializer
+    queryset = TotalTherapist.objects.all().order_by('end_date')
+    filterset_class = TotalTherapistFilter
 
 
-class NumberOfTherapistDetailView(generics.CreateAPIView):
+class TotalTherapistDetailView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = NumberOfTherapistDeserializer
+    write_serializer_class = TotalTherapistDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -61,22 +53,15 @@ class NumberOfTherapistDetailView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-class AllTimeOrganizationRateListView(generics.ListCreateAPIView):
-    read_serializer_class = AllTimeOrganizationRateSerializer
-    write_serializer_class = AllTimeOrganizationRateDeserializer
-    queryset = AllTimeOrganizationRate.objects.all().order_by('-end_date')
-    filterset_class = AllTimeOrganizationRateFilter
+class TherapistRateListView(generics.ListAPIView):
+    serializer_class = TherapistRateSerializer
+    queryset = TherapistRate.objects.all().order_by('end_date')
+    filterset_class = TherapistRateFilter
 
 
-class OrganizationRateListView(generics.ListAPIView):
-    serializer_class = OrganizationRateSerializer
-    queryset = OrganizationRate.objects.all().order_by('id')
-    filterset_class = OrganizationRateFilter
-
-
-class OrganizationRateDetailView(generics.CreateAPIView):
+class TherapistRateDetailView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = OrganizationRateDeserializer
+    write_serializer_class = TherapistRateDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

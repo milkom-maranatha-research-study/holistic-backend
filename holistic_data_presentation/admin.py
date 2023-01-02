@@ -2,13 +2,13 @@ from django.contrib import admin
 
 
 from holistic_data_presentation.models import (
-    NumberOfTherapist,
-    OrganizationRate
+    TherapistRate,
+    TotalTherapist,
 )
 
 
-@admin.register(NumberOfTherapist)
-class NumberOfTherapistAdmin(admin.ModelAdmin):
+@admin.register(TotalTherapist)
+class TotalTherapistAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
@@ -29,8 +29,8 @@ class NumberOfTherapistAdmin(admin.ModelAdmin):
     search_fields = ('organization__name',)
 
 
-@admin.register(OrganizationRate)
-class OrganizationRateAdmin(admin.ModelAdmin):
+@admin.register(TherapistRate)
+class TherapistRateAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
