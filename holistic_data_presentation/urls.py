@@ -2,10 +2,10 @@ from django.urls import path
 
 from holistic_data_presentation.views import (
     TherapistRateListView,
-    TherapistRateDetailView,
+    OrgTherapistRateListView,
     TotalAllTherapistListView,
     TotalTherapistListView,
-    TotalTherapistDetailView,
+    OrgTotalTherapistListView,
 )
 
 urlpatterns = [
@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path(
         'organizations/<int:id>/total-therapists/',
-        TotalTherapistDetailView.as_view(),
+        OrgTotalTherapistListView.as_view(),
         name='total-therapists-per-organization'
     ),
     path(
@@ -31,7 +31,7 @@ urlpatterns = [
     ),
     path(
         'organizations/<int:id>/rates/',
-        TherapistRateDetailView.as_view(),
+        OrgTherapistRateListView.as_view(),
         name='rates-per-organization'
     ),
 ]

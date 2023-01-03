@@ -12,12 +12,14 @@ from holistic_data_presentation.models import (
 )
 from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
-    TherapistRateSerializer,
     TherapistRateDeserializer,
+    TotalTherapistDeserializer,
+    OrgTherapistRateDeserializer,
+    OrgTotalTherapistDeserializer,
+    TherapistRateSerializer,
     TotalAllTherapistSerializer,
     TotalAllTherapistDeserializer,
     TotalTherapistSerializer,
-    TotalTherapistDeserializer,
 )
 
 
@@ -26,15 +28,31 @@ class TotalAllTherapistListView(generics.CreateAPIView):
     write_serializer_class = TotalAllTherapistDeserializer
 
 
-class TotalTherapistListView(generics.ListAPIView):
-    serializer_class = TotalTherapistSerializer
-    queryset = TotalTherapist.objects.all().order_by('end_date')
+class TotalTherapistListView(generics.ListCreateAPIView):
+    read_serializer_class = TotalTherapistSerializer
+    write_serializer_class = TotalTherapistDeserializer
     filterset_class = TotalTherapistFilter
 
+    queryset = TotalTherapist.objects.all().order_by('end_date')
 
-class TotalTherapistDetailView(generics.CreateAPIView):
+    def get_read_serializer_class(self):
+        if self.request.method == 'POST':
+            return BatchCreateSerializer
+
+        return super().get_read_serializer_class()
+
+    def post(self, request, *args, **kwargs):
+        deserializer = self.get_write_serializer(data=request.data, many=True)
+        deserializer.is_valid(raise_exception=True)
+        deserializer.save()
+
+        serializer = self.get_read_serializer(deserializer.instance)
+        return Response(serializer.data)
+
+
+class OrgTotalTherapistListView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = TotalTherapistDeserializer
+    write_serializer_class = OrgTotalTherapistDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -53,15 +71,31 @@ class TotalTherapistDetailView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-class TherapistRateListView(generics.ListAPIView):
-    serializer_class = TherapistRateSerializer
-    queryset = TherapistRate.objects.all().order_by('end_date')
+class TherapistRateListView(generics.ListCreateAPIView):
+    read_serializer_class = TherapistRateSerializer
+    write_serializer_class = TherapistRateDeserializer
     filterset_class = TherapistRateFilter
 
+    queryset = TherapistRate.objects.all().order_by('end_date')
 
-class TherapistRateDetailView(generics.CreateAPIView):
+    def get_read_serializer_class(self):
+        if self.request.method == 'POST':
+            return BatchCreateSerializer
+
+        return super().get_read_serializer_class()
+
+    def post(self, request, *args, **kwargs):
+        deserializer = self.get_write_serializer(data=request.data, many=True)
+        deserializer.is_valid(raise_exception=True)
+        deserializer.save()
+
+        serializer = self.get_read_serializer(deserializer.instance)
+        return Response(serializer.data)
+
+
+class OrgTherapistRateListView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = TherapistRateDeserializer
+    write_serializer_class = OrgTherapistRateDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
