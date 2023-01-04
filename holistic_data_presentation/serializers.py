@@ -82,39 +82,43 @@ class TotalTherapistSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class OrgTotalTherapistBatchDeserializer(serializers.ListSerializer):
+class BaseTotalTherapistBatchDeserializer(serializers.ListSerializer):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.organization_id = self.context['organization_id']
+        self.organization_id = None
 
     @transaction.atomic
-    def create(self, num_of_therlist):
+    def create(self, list_total_thers):
         """
-        We override this method to implement upsert the total therapists per Organization in batch.
+        We override this method to implement upsert the total therapists in batch.
 
-        @param num_of_therlist: Validated JSON Array that contains a list of total therapists.
+        @param list_total_thers: Validated JSON Array that contains a list of total therapists.
         """
-        existing_total_thers = [
-            number_of_ther
-            for number_of_ther in TotalTherapist.objects.filter(organization_id=self.organization_id)
-        ]
+        existing_total_thers = self.get_existing_total_therapists()
 
-        to_update_objects = self._get_objects_to_update(num_of_therlist, existing_total_thers)
-        to_create_objects = self._get_objects_to_create(num_of_therlist, existing_total_thers)
+        to_update_objects = self._get_objects_to_update(list_total_thers, existing_total_thers)
+        to_create_objects = self._get_objects_to_create(list_total_thers, existing_total_thers)
 
-        TotalTherapist.objects.bulk_update(to_update_objects, fields=['period_type', 'is_active', 'value'])
+        TotalTherapist.objects.bulk_update(to_update_objects, fields=['period_type', 'value'])
         rows_created = len(TotalTherapist.objects.bulk_create(to_create_objects))
-        rows_updated = len(num_of_therlist) - rows_created
+        rows_updated = len(list_total_thers) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
 
-    def _get_objects_to_create(self, num_of_ther_list, existing_total_thers):
+    def get_existing_total_therapists(self):
+        """
+        Returns the existing `TotalTherapist` objects based on that incoming `list_total_thers`.
+        """
+        raise NotImplementedError()
+
+    def _get_objects_to_create(self, list_total_thers, existing_total_thers):
         """
         Returns a list of `TotalTherapist` objects that are going to be created in batch.
 
-        @param num_of_ther_list: Validated JSON Array that contains a list of total therapists.
-        @param existing_total_thers: Existing total therapists in the organization.
+        @param list_total_thers: Validated JSON Array that contains a list of total therapists.
+        @param existing_total_thers: Existing total therapists.
         """
         return [
             TotalTherapist(
@@ -125,72 +129,93 @@ class OrgTotalTherapistBatchDeserializer(serializers.ListSerializer):
                 is_active=item['is_active'],
                 value=item['value']
             )
-            for item in num_of_ther_list if self._is_new_data(item, existing_total_thers)
+            for item in list_total_thers if self._is_new_item(item, existing_total_thers)
         ]
 
-    def _is_new_data(self, item, existing_total_thers):
+    def _is_new_item(self, item, existing_total_thers):
         """
-        Returns `True` if that `item`'s period doesn't exist
-        in the list of existing existing total therapists in the organization.
+        Returns `True` if that `item` doesn't exist
+        in the list of existing existing total therapists.
 
         @param item: A dictionary that represents the total therapist within the payload data.
-        @param existing_total_thers: Existing total therapists in the organization.
+        @param existing_total_thers: Existing total therapists.
         """
-        for num_of_ther in existing_total_thers:
+        for total_ther in existing_total_thers:
             if bool(
-                item['is_active'] == num_of_ther.is_active and
-                item['start_date'] == num_of_ther.start_date and
-                item['end_date'] == num_of_ther.end_date
+                item['start_date'] == total_ther.start_date and
+                item['end_date'] == total_ther.end_date and
+                item['is_active'] == total_ther.is_active
             ):
                 return False
 
         return True
 
-    def _get_objects_to_update(self, num_of_ther_list, existing_total_thers):
+    def _get_objects_to_update(self, list_total_thers, existing_total_thers):
         """
         Returns a list of `TotalTherapist` objects that are going to be updated in batch.
 
-        @param num_of_ther_list: Validated JSON Array that contains a list of total therapists.
-        @param existing_total_thers: Existing total therapists in the organization.
+        @param list_total_thers: Validated JSON Array that contains a list of total therapists.
+        @param existing_total_thers: Existing total therapists.
         """
         objects_to_update = []
 
-        for item in num_of_ther_list:
-            pair = self._get_pair_of_item(item, existing_total_thers)
+        for item in list_total_thers:
+            to_update = self._get_object_to_update(item, existing_total_thers)
 
-            if pair is None:
+            if to_update is None:
                 # That `item` doesn't exists,
                 # skip it from the update candidates.
                 continue
 
-            item, num_of_ther = list(pair)
-            num_of_ther.period_type = item['period_type']
+            item, num_of_ther = list(to_update)
             num_of_ther.value = item['value']
 
             objects_to_update.append(num_of_ther)
 
         return objects_to_update
 
-    def _get_pair_of_item(self, item, existing_total_thers):
+    def _get_object_to_update(self, item, existing_total_thers):
         """
         Returns a pair of (`item`, `TotalTherapist`)
-        if the `item`'s period exists on the list of existing total therapists.
+        if the `item` exists on the list of existing total therapists.
 
         @param item: A dictionary that represents the Therapist within the payload data.
-        @param existing_total_thers: Existing total therapists in the organization.
+        @param existing_total_thers: Existing total therapists.
         """
-        for num_of_ther in existing_total_thers:
+        for total_ther in existing_total_thers:
             if bool(
-                item['is_active'] == num_of_ther.is_active and
-                item['start_date'] == num_of_ther.start_date and
-                item['end_date'] == num_of_ther.end_date
+                item['start_date'] == total_ther.start_date and
+                item['end_date'] == total_ther.end_date and
+                item['is_active'] == total_ther.is_active
             ):
-                return (item, num_of_ther)
+                return (item, total_ther)
 
         return None
 
 
-class OrgTotalTherapistDeserializer(serializers.Serializer):
+class TotalTherapistBatchDeserializer(BaseTotalTherapistBatchDeserializer):
+
+    def get_existing_total_therapists(self):
+        """
+        Returns the existing `TotalTherapist` objects in Niceday.
+        """
+        return TotalTherapist.objects.filter(organization__isnull=True)
+
+
+class TotalTherapistInOrgBatchDeserializer(BaseTotalTherapistBatchDeserializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.organization_id = self.context['organization_id']
+
+    def get_existing_total_therapists(self):
+        """
+        Returns the existing `TotalTherapist` objects in the Organization.
+        """
+        return TotalTherapist.objects.filter(organization_id=self.organization_id)
+
+
+class TotalTherapistDeserializer(serializers.Serializer):
     period_type = serializers.ChoiceField(
         choices=TotalTherapist.PERIOD_CHOICES
     )
@@ -200,7 +225,7 @@ class OrgTotalTherapistDeserializer(serializers.Serializer):
     value = serializers.IntegerField()
 
     class Meta:
-        list_serializer_class = OrgTotalTherapistBatchDeserializer
+        list_serializer_class = TotalTherapistBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -222,110 +247,7 @@ class OrgTotalTherapistDeserializer(serializers.Serializer):
         return attrs
 
 
-class TotalTherapistBatchDeserializer(serializers.ListSerializer):
-
-    @transaction.atomic
-    def create(self, num_of_therlist):
-        """
-        We override this method to implement upsert the NiceDay's total therapists in batch.
-
-        @param num_of_therlist: Validated JSON Array that contains a list of total therapists.
-        """
-        existing_total_thers = [
-            number_of_ther
-            for number_of_ther in TotalTherapist.objects.filter(organization__isnull=True)
-        ]
-
-        to_update_objects = self._get_objects_to_update(num_of_therlist, existing_total_thers)
-        to_create_objects = self._get_objects_to_create(num_of_therlist, existing_total_thers)
-
-        TotalTherapist.objects.bulk_update(to_update_objects, fields=['period_type', 'is_active', 'value'])
-        rows_created = len(TotalTherapist.objects.bulk_create(to_create_objects))
-        rows_updated = len(num_of_therlist) - rows_created
-
-        return {'rows_created': rows_created, 'rows_updated': rows_updated}
-
-    def _get_objects_to_create(self, num_of_ther_list, existing_total_thers):
-        """
-        Returns a list of `TotalTherapist` objects that are going to be created in batch.
-
-        @param num_of_ther_list: Validated JSON Array that contains a list of total therapists.
-        @param existing_total_thers: Existing total therapists in NiceDay.
-        """
-        return [
-            TotalTherapist(
-                period_type=item['period_type'],
-                start_date=item['start_date'],
-                end_date=item['end_date'],
-                is_active=item['is_active'],
-                value=item['value']
-            )
-            for item in num_of_ther_list if self._is_new_data(item, existing_total_thers)
-        ]
-
-    def _is_new_data(self, item, existing_total_thers):
-        """
-        Returns `True` if that `item`'s period doesn't exist
-        in the list of existing existing total therapists in NiceDay.
-
-        @param item: A dictionary that represents the total therapist within the payload data.
-        @param existing_total_thers: Existing total therapists in NiceDay.
-        """
-        for num_of_ther in existing_total_thers:
-            if bool(
-                item['is_active'] == num_of_ther.is_active and
-                item['start_date'] == num_of_ther.start_date and
-                item['end_date'] == num_of_ther.end_date
-            ):
-                return False
-
-        return True
-
-    def _get_objects_to_update(self, num_of_ther_list, existing_total_thers):
-        """
-        Returns a list of `TotalTherapist` objects that are going to be updated in batch.
-
-        @param num_of_ther_list: Validated JSON Array that contains a list of total therapists.
-        @param existing_total_thers: Existing total therapists in NiceDay.
-        """
-        objects_to_update = []
-
-        for item in num_of_ther_list:
-            pair = self._get_pair_of_item(item, existing_total_thers)
-
-            if pair is None:
-                # That `item` doesn't exists,
-                # skip it from the update candidates.
-                continue
-
-            item, num_of_ther = list(pair)
-            num_of_ther.period_type = item['period_type']
-            num_of_ther.value = item['value']
-
-            objects_to_update.append(num_of_ther)
-
-        return objects_to_update
-
-    def _get_pair_of_item(self, item, existing_total_thers):
-        """
-        Returns a pair of (`item`, `TotalTherapist`)
-        if the `item`'s period exists on the list of existing total therapists.
-
-        @param item: A dictionary that represents the Therapist within the payload data.
-        @param existing_total_thers: Existing total therapists in NiceDay.
-        """
-        for num_of_ther in existing_total_thers:
-            if bool(
-                item['is_active'] == num_of_ther.is_active and
-                item['start_date'] == num_of_ther.start_date and
-                item['end_date'] == num_of_ther.end_date
-            ):
-                return (item, num_of_ther)
-
-        return None
-
-
-class TotalTherapistDeserializer(serializers.Serializer):
+class TotalTherapistInOrgDeserializer(serializers.Serializer):
     period_type = serializers.ChoiceField(
         choices=TotalTherapist.PERIOD_CHOICES
     )
@@ -335,7 +257,7 @@ class TotalTherapistDeserializer(serializers.Serializer):
     value = serializers.IntegerField()
 
     class Meta:
-        list_serializer_class = TotalTherapistBatchDeserializer
+        list_serializer_class = TotalTherapistInOrgBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -371,39 +293,42 @@ class TherapistRateSerializer(serializers.ModelSerializer):
         read_only = fields
 
 
-class OrgTherapistRateBatchDeserializer(serializers.ListSerializer):
+class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.organization_id = self.context['organization_id']
+        self.organization_id = None
 
     @transaction.atomic
-    def create(self, rate_list):
+    def create(self, list_rate):
         """
-        We override this method to implement upsert the therapists' rates per Org in batch.
+        We override this method to implement upsert the therapists' rates in batch.
 
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
+        @param list_rate: Validated JSON Array that contains a list of the therapists' rates.
         """
-        existing_rates = [
-            rate
-            for rate in TherapistRate.objects.filter(organization_id=self.organization_id)
-        ]
+        existing_rates = self.get_existing_rates()
 
-        to_update_objects = self._get_objects_to_update(rate_list, existing_rates)
-        to_create_objects = self._get_objects_to_create(rate_list, existing_rates)
+        to_update_objects = self._get_objects_to_update(list_rate, existing_rates)
+        to_create_objects = self._get_objects_to_create(list_rate, existing_rates)
 
         TherapistRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
         rows_created = len(TherapistRate.objects.bulk_create(to_create_objects))
-        rows_updated = len(rate_list) - rows_created
+        rows_updated = len(list_rate) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
 
-    def _get_objects_to_create(self, rate_list, existing_rates):
+    def get_existing_rates(self):
+        """
+        Returns the existing `Rate` objects based on that incoming `list_rate`.
+        """
+        raise NotImplementedError()
+
+    def _get_objects_to_create(self, list_rate, existing_rates):
         """
         Returns a list of `TherapistRate` objects that are going to be created in batch.
 
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
+        @param list_rate: Validated JSON Array that contains a list of the therapists' rates.
         @param existing_rates: Existing therapists' rates.
         """
         return [
@@ -415,10 +340,10 @@ class OrgTherapistRateBatchDeserializer(serializers.ListSerializer):
                 end_date=item['end_date'],
                 rate_value=item['rate_value']
             )
-            for item in rate_list if self._is_new_data(item, existing_rates)
+            for item in list_rate if self._is_new_item(item, existing_rates)
         ]
 
-    def _is_new_data(self, item, existing_rates):
+    def _is_new_item(self, item, existing_rates):
         """
         Returns `True` if that `item`'s type and period doesn't exist
         in the list of existing therapists' rates.
@@ -428,25 +353,25 @@ class OrgTherapistRateBatchDeserializer(serializers.ListSerializer):
         """
         for rate in existing_rates:
             if bool(
-                item['type'] == rate.type and
                 item['start_date'] == rate.start_date and
-                item['end_date'] == rate.end_date
+                item['end_date'] == rate.end_date and
+                item['type'] == rate.type
             ):
                 return False
 
         return True
 
-    def _get_objects_to_update(self, rate_list, existing_rates):
+    def _get_objects_to_update(self, list_rate, existing_rates):
         """
         Returns a list of `TherapistRate` objects that are going to be updated in batch.
 
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
+        @param list_rate: Validated JSON Array that contains a list of the therapists' rates.
         @param existing_rates: Existing therapists' rates.
         """
         objects_to_update = []
 
-        for item in rate_list:
-            pair = self._get_pair_of_item(item, existing_rates)
+        for item in list_rate:
+            pair = self._get_object_to_update(item, existing_rates)
 
             if pair is None:
                 # That `item` doesn't exists,
@@ -461,7 +386,7 @@ class OrgTherapistRateBatchDeserializer(serializers.ListSerializer):
 
         return objects_to_update
 
-    def _get_pair_of_item(self, item, existing_rates):
+    def _get_object_to_update(self, item, existing_rates):
         """
         Returns a pair of (`item`, `TherapistRate`)
         if the `item`'s type and period doesn't exist on the existing rates.
@@ -471,16 +396,39 @@ class OrgTherapistRateBatchDeserializer(serializers.ListSerializer):
         """
         for rate in existing_rates:
             if bool(
-                item['type'] == rate.type and
                 item['start_date'] == rate.start_date and
-                item['end_date'] == rate.end_date
+                item['end_date'] == rate.end_date and
+                item['type'] == rate.type
             ):
                 return (item, rate)
 
         return None
 
 
-class OrgTherapistRateDeserializer(serializers.Serializer):
+class TherapistRateBatchDeserializer(BaseTherapistRateBatchDeserializer):
+
+    def get_existing_rates(self):
+        """
+        Returns the existing `Rate` objects in NiceDay.
+        """
+        return TherapistRate.objects.filter(organization__isnull=True)
+
+
+class TherapistRateInOrgBatchDeserializer(BaseTherapistRateBatchDeserializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.organization_id = self.context['organization_id']
+
+    def get_existing_rates(self):
+        """
+        Returns the existing `Rate` objects in the Organization.
+        """
+        return TherapistRate.objects.filter(organization_id=self.organization_id)
+
+
+class TherapistRateDeserializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=TherapistRate.TYPE_CHOICES
     )
@@ -492,7 +440,7 @@ class OrgTherapistRateDeserializer(serializers.Serializer):
     rate_value = serializers.FloatField()
 
     class Meta:
-        list_serializer_class = OrgTherapistRateBatchDeserializer
+        list_serializer_class = TherapistRateBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -514,110 +462,7 @@ class OrgTherapistRateDeserializer(serializers.Serializer):
         return attrs
 
 
-class TherapistRateBatchDeserializer(serializers.ListSerializer):
-
-    @transaction.atomic
-    def create(self, rate_list):
-        """
-        We override this method to implement upsert the NiceDay therapists' rates in batch.
-
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
-        """
-        existing_rates = [
-            rate
-            for rate in TherapistRate.objects.filter(organization__isnull=True)
-        ]
-
-        to_update_objects = self._get_objects_to_update(rate_list, existing_rates)
-        to_create_objects = self._get_objects_to_create(rate_list, existing_rates)
-
-        TherapistRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
-        rows_created = len(TherapistRate.objects.bulk_create(to_create_objects))
-        rows_updated = len(rate_list) - rows_created
-
-        return {'rows_created': rows_created, 'rows_updated': rows_updated}
-
-    def _get_objects_to_create(self, rate_list, existing_rates):
-        """
-        Returns a list of `TherapistRate` objects that are going to be created in batch.
-
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
-        @param existing_rates: Existing therapists' rates.
-        """
-        return [
-            TherapistRate(
-                type=item['type'],
-                period_type=item['period_type'],
-                start_date=item['start_date'],
-                end_date=item['end_date'],
-                rate_value=item['rate_value']
-            )
-            for item in rate_list if self._is_new_data(item, existing_rates)
-        ]
-
-    def _is_new_data(self, item, existing_rates):
-        """
-        Returns `True` if that `item`'s type and period doesn't exist
-        in the list of existing therapists' rates.
-
-        @param item: A dictionary that represents the therapist's rate within the payload data.
-        @param existing_rates: Existing therapists' rates.
-        """
-        for rate in existing_rates:
-            if bool(
-                item['type'] == rate.type and
-                item['start_date'] == rate.start_date and
-                item['end_date'] == rate.end_date
-            ):
-                return False
-
-        return True
-
-    def _get_objects_to_update(self, rate_list, existing_rates):
-        """
-        Returns a list of `TherapistRate` objects that are going to be updated in batch.
-
-        @param rate_list: Validated JSON Array that contains a list of the therapists' rates.
-        @param existing_rates: Existing therapists' rates.
-        """
-        objects_to_update = []
-
-        for item in rate_list:
-            pair = self._get_pair_of_item(item, existing_rates)
-
-            if pair is None:
-                # That `item` doesn't exists,
-                # skip it from the update candidates.
-                continue
-
-            item, rate = list(pair)
-            rate.period_type = item['period_type']
-            rate.rate_value = item['rate_value']
-
-            objects_to_update.append(rate)
-
-        return objects_to_update
-
-    def _get_pair_of_item(self, item, existing_rates):
-        """
-        Returns a pair of (`item`, `TherapistRate`)
-        if the `item`'s type and period doesn't exist on the existing rates.
-
-        @param item: A dictionary that represents the therapist's rate within the payload data.
-        @param existing_rates: Existing therapists' rates.
-        """
-        for rate in existing_rates:
-            if bool(
-                item['type'] == rate.type and
-                item['start_date'] == rate.start_date and
-                item['end_date'] == rate.end_date
-            ):
-                return (item, rate)
-
-        return None
-
-
-class TherapistRateDeserializer(serializers.Serializer):
+class TherapistRateInOrgDeserializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=TherapistRate.TYPE_CHOICES
     )
@@ -629,7 +474,7 @@ class TherapistRateDeserializer(serializers.Serializer):
     rate_value = serializers.FloatField()
 
     class Meta:
-        list_serializer_class = TherapistRateBatchDeserializer
+        list_serializer_class = TherapistRateInOrgBatchDeserializer
 
     def validate(self, attrs):
         """

@@ -13,12 +13,12 @@ from holistic_data_presentation.models import (
 from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
     TherapistRateDeserializer,
-    TotalTherapistDeserializer,
-    OrgTherapistRateDeserializer,
-    OrgTotalTherapistDeserializer,
+    TherapistRateInOrgDeserializer,
     TherapistRateSerializer,
     TotalAllTherapistSerializer,
     TotalAllTherapistDeserializer,
+    TotalTherapistDeserializer,
+    TotalTherapistInOrgDeserializer,
     TotalTherapistSerializer,
 )
 
@@ -50,9 +50,9 @@ class TotalTherapistListView(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class OrgTotalTherapistListView(generics.CreateAPIView):
+class TotalTherapistInOrgListView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = OrgTotalTherapistDeserializer
+    write_serializer_class = TotalTherapistInOrgDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -93,9 +93,9 @@ class TherapistRateListView(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class OrgTherapistRateListView(generics.CreateAPIView):
+class TherapistRateInOrgListView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = OrgTherapistRateDeserializer
+    write_serializer_class = TherapistRateInOrgDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
