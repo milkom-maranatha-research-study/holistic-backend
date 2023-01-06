@@ -17,57 +17,6 @@ class BatchCreateSerializer(serializers.Serializer):
     rows_updated = serializers.IntegerField(required=False)
 
 
-class TotalAllTherapistSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TotalTherapist
-        fields = (
-            'start_date',
-            'end_date',
-            'is_active',
-            'value',
-        )
-        read_only = fields
-
-
-class TotalAllTherapistDeserializer(serializers.ModelSerializer):
-    class Meta:
-        model = TotalTherapist
-        fields = (
-            'start_date',
-            'end_date',
-            'is_active',
-            'value',
-        )
-
-    def get_unique_together_validators(self):
-        """
-        Returns empty validators.
-
-        The unique together validators are applied on the database level.
-
-        However, we want to disable it on the deserializer level
-        because we perform `upsert` instead of `create` operation.
-        """
-        return []
-
-    def create(self, validated_data):
-        """
-        Upsert `TotalAllTherapist` instance based on these fields
-        (`start_date`, `end_date`, `is_active`)
-        """
-        obj, _ = TotalTherapist.objects.update_or_create(
-            value=validated_data['value'],
-            defaults={
-                'organization': None,
-                'period_type': TotalTherapist.TYPE_ALLTIME,
-                'start_date': validated_data['start_date'],
-                'end_date': validated_data['end_date'],
-                'is_active': validated_data['is_active']
-            },
-        )
-        return obj
-
-
 class TotalTherapistSerializer(serializers.ModelSerializer):
     class Meta:
         model = TotalTherapist

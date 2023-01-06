@@ -15,17 +15,10 @@ from holistic_data_presentation.serializers import (
     TherapistRateDeserializer,
     TherapistRateInOrgDeserializer,
     TherapistRateSerializer,
-    TotalAllTherapistSerializer,
-    TotalAllTherapistDeserializer,
     TotalTherapistDeserializer,
     TotalTherapistInOrgDeserializer,
     TotalTherapistSerializer,
 )
-
-
-class TotalAllTherapistListView(generics.CreateAPIView):
-    read_serializer_class = TotalAllTherapistSerializer
-    write_serializer_class = TotalAllTherapistDeserializer
 
 
 class TotalTherapistListView(generics.ListCreateAPIView):
