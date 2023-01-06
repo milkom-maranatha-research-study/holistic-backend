@@ -443,3 +443,65 @@ class TherapistRateInOrgDeserializer(serializers.Serializer):
             validate_yearly_period(start_date, end_date)
 
         return attrs
+
+
+class TotalTherapistExportJSONSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        return {
+            "organization_id": instance.organization_id,
+            "type": "active" if instance.is_active else "inactive",
+            "period_type": instance.period_type,
+            "start_date": instance.start_date.isoformat(),
+            "end_date": instance.end_date.isoformat(),
+            "value": instance.value
+        }
+
+
+class TotalTherapistExportCSVSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        return [
+            instance.organization_id,
+            "active" if instance.is_active else "inactive",
+            instance.period_type,
+            instance.start_date.isoformat(),
+            instance.end_date.isoformat(),
+            instance.value
+        ]
+
+
+class TherapistRateExportJSONSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        return {
+            "organization_id": instance.organization_id,
+            "type": instance.type,
+            "period_type": instance.period_type,
+            "start_date": instance.start_date.isoformat(),
+            "end_date": instance.end_date.isoformat(),
+            "rate_value": instance.rate_value
+        }
+
+
+class TherapistRateExportCSVSerializer(serializers.Serializer):
+
+    def to_representation(self, instance):
+        return [
+            instance.organization_id,
+            instance.type,
+            instance.period_type,
+            instance.start_date.isoformat(),
+            instance.end_date.isoformat(),
+            instance.rate_value
+        ]
+
+
+class ExportDeserializer(serializers.Serializer):
+    TYPE_JSON = 'json'
+    TYPE_CSV = 'csv'
+    FORMAT_CHOICES = (
+        (TYPE_JSON, 'JSON'),
+        (TYPE_CSV, 'CSV'),
+    )
+    format = serializers.ChoiceField(choices=FORMAT_CHOICES)

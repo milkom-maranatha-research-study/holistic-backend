@@ -52,10 +52,11 @@ class TherapistExportView(generics.CreateAPIView):
 
         elif format == 'csv':
             csv_stream = CSVStream()
+            headers = ['id', 'organization_id', 'date_joined']
 
             return csv_stream.export(
                 filename,
-                ['id', 'organization_id', 'date_joined'],
+                headers,
                 queryset.iterator(),
                 TherapistExportCSVSerializer
             )
@@ -87,13 +88,12 @@ class InteractionExportView(generics.CreateAPIView):
             return response
 
         elif format == 'csv':
+            csv_stream = CSVStream()
             headers = [
                 'therapist_id', 'interaction_date', 'counter',
                 'chat_count', 'call_count', 'organization_id',
                 'organization_date_joined'
             ]
-
-            csv_stream = CSVStream()
 
             return csv_stream.export(
                 filename,

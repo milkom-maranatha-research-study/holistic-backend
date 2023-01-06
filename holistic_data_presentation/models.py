@@ -10,6 +10,8 @@ class TotalTherapist(models.Model):
         null=True
     )
 
+    is_active = models.BooleanField(default=False)
+
     TYPE_ALLTIME = 'alltime'
     TYPE_WEEKLY = 'weekly'
     TYPE_MONTHLY = 'monthly'
@@ -28,7 +30,6 @@ class TotalTherapist(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
-    is_active = models.BooleanField(default=False)
     value = models.PositiveIntegerField()
 
     class Meta:
