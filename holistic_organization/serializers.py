@@ -135,12 +135,13 @@ class TherapistBatchDeserializer(serializers.ListSerializer):
 
         @param list_therapists: Validated JSON Array that contains a list of therapists.
         """
-        existing_therapists = Therapist.objects.filter(organization_id=self.organization_id)
+        list_ther_ids = [item['therapist_id'] for item in list_therapists]
+        existing_therapists = Therapist.objects.filter(id__in=list_ther_ids)
 
         objects_to_update = self._get_objects_to_update(list_therapists, existing_therapists)
         objects_to_create = self._get_objects_to_create(list_therapists, existing_therapists)
 
-        Therapist.objects.bulk_update(objects_to_update, fields=['date_joined'])
+        Therapist.objects.bulk_update(objects_to_update, fields=['organization', 'date_joined'])
         rows_created = len(Therapist.objects.bulk_create(objects_to_create))
         rows_updated = len(list_therapists) - rows_created
 
@@ -193,6 +194,7 @@ class TherapistBatchDeserializer(serializers.ListSerializer):
                 continue
 
             item, therapist = list(pair)
+            therapist.organization_id = self.organization_id
             therapist.date_joined = item['date_joined']
 
             therapists_to_update.append(therapist)
