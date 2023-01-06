@@ -97,7 +97,7 @@ class TotalTherapistExportView(generics.CreateAPIView):
         elif format == 'csv':
             csv_stream = CSVStream()
             headers = [
-                'organization_id', 'is_active', 'period_type',
+                'organization_id', 'type', 'period_type',
                 'start_date', 'end_date', 'value'
             ]
 
