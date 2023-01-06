@@ -28,8 +28,7 @@ class OrganizationListView(generics.ListAPIView):
     queryset = Organization.objects.all().order_by('id')
 
 
-class TherapistListView(generics.CreateAPIView):
-    queryset = Therapist.objects.all().order_by('id')
+class TherapistExportView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         deserializer = ExportDeserializer(data=request.data)
@@ -38,9 +37,11 @@ class TherapistListView(generics.CreateAPIView):
         format = deserializer.validated_data['format']
         filename = 'therapists'
 
+        queryset = Therapist.objects.all().order_by('id')
+
         if format == 'json':
             serializer = TherapistExportJSONSerializer(
-                self.get_queryset(),
+                queryset,
                 many=True
             )
 
@@ -55,18 +56,14 @@ class TherapistListView(generics.CreateAPIView):
             return csv_stream.export(
                 filename,
                 ['id', 'organization_id', 'date_joined'],
-                self.get_queryset().iterator(),
+                queryset.iterator(),
                 TherapistExportCSVSerializer
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class InteractionListView(generics.CreateAPIView):
-
-    def get_queryset(self):
-        return Interaction.objects.annotate_organization_id()\
-            .annotate_organization_date_joined().order_by('id')
+class InteractionExportView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         deserializer = ExportDeserializer(data=request.data)
@@ -75,9 +72,12 @@ class InteractionListView(generics.CreateAPIView):
         format = deserializer.validated_data['format']
         filename = 'therapists_interactions'
 
+        queryset = Interaction.objects.annotate_organization_id()\
+            .annotate_organization_date_joined().order_by('id')
+
         if format == 'json':
             serializer = InteractionExportJSONSerializer(
-                self.get_queryset(),
+                queryset,
                 many=True
             )
 
@@ -98,7 +98,7 @@ class InteractionListView(generics.CreateAPIView):
             return csv_stream.export(
                 filename,
                 headers,
-                self.get_queryset().iterator(),
+                queryset.iterator(),
                 InteractionExportCSVSerializer
             )
 

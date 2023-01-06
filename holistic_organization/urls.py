@@ -1,12 +1,12 @@
 from django.urls import path
 
 from holistic_organization.views import (
-    OrganizationListView,
-    TherapistListView,
-    InteractionListView,
-    OrganizationSyncView,
-    TherapistSyncView,
+    InteractionExportView,
     InteractionSyncView,
+    OrganizationListView,
+    OrganizationSyncView,
+    TherapistExportView,
+    TherapistSyncView,
 )
 
 urlpatterns = [
@@ -17,12 +17,12 @@ urlpatterns = [
     ),
     path(
         'therapists/export/',
-        TherapistListView.as_view(),
+        TherapistExportView.as_view(),
         name='export-all-therapists'
     ),
     path(
         'interactions/export/',
-        InteractionListView.as_view(),
+        InteractionExportView.as_view(),
         name='export-all-interactions'
     ),
     path(
