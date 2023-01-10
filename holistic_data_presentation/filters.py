@@ -20,6 +20,7 @@ class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
 
 class BaseFilter(filters.FilterSet):
     organization = NumberInFilter(field_name='organization', lookup_expr='in')
+    niceday_only = filters.BooleanFilter(field_name='organization', lookup_expr='isnull')
 
     period_type = filters.CharFilter(
         method='filter_by_period_type'
