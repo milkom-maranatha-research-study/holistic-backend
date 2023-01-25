@@ -38,7 +38,7 @@ class TotalTherapist(models.Model):
         )
 
 
-class TherapistRate(models.Model):
+class Rate(models.Model):
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -72,7 +72,7 @@ class TherapistRate(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
-    rate_value = models.FloatField()
+    value = models.FloatField()
 
     class Meta:
         unique_together = (

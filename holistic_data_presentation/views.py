@@ -4,21 +4,21 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from holistic_data_presentation.filters import (
-    TherapistRateFilter,
+    RateFilter,
     TotalTherapistFilter,
 )
 from holistic_data_presentation.models import (
-    TherapistRate,
+    Rate,
     TotalTherapist,
 )
 from holistic_data_presentation.serializers import (
     BatchCreateSerializer,
     ExportDeserializer,
-    TherapistRateDeserializer,
-    TherapistRateExportCSVSerializer,
-    TherapistRateExportJSONSerializer,
-    TherapistRateInOrgDeserializer,
-    TherapistRateSerializer,
+    RateDeserializer,
+    RateExportCSVSerializer,
+    RateExportJSONSerializer,
+    RatePerOrgDeserializer,
+    RateSerializer,
     TotalTherapistDeserializer,
     TotalTherapistExportCSVSerializer,
     TotalTherapistExportJSONSerializer,
@@ -111,12 +111,12 @@ class TotalTherapistExportView(generics.CreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TherapistRateListView(generics.ListCreateAPIView):
-    read_serializer_class = TherapistRateSerializer
-    write_serializer_class = TherapistRateDeserializer
-    filterset_class = TherapistRateFilter
+class RateListView(generics.ListCreateAPIView):
+    read_serializer_class = RateSerializer
+    write_serializer_class = RateDeserializer
+    filterset_class = RateFilter
 
-    queryset = TherapistRate.objects.all().order_by('end_date')
+    queryset = Rate.objects.all().order_by('end_date')
 
     def get_read_serializer_class(self):
         if self.request.method == 'POST':
@@ -133,9 +133,9 @@ class TherapistRateListView(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class TherapistRateInOrgListView(generics.CreateAPIView):
+class RatePerOrgListView(generics.CreateAPIView):
     read_serializer_class = BatchCreateSerializer
-    write_serializer_class = TherapistRateInOrgDeserializer
+    write_serializer_class = RatePerOrgDeserializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -154,7 +154,7 @@ class TherapistRateInOrgListView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-class TherapistRateExportView(generics.CreateAPIView):
+class RateExportView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         deserializer = ExportDeserializer(data=request.data)
@@ -163,11 +163,11 @@ class TherapistRateExportView(generics.CreateAPIView):
         format = deserializer.validated_data['format']
         filename = 'therapists_rates'
 
-        queryset = TherapistRate.objects.all()\
+        queryset = Rate.objects.all()\
             .order_by('organization', 'type', 'period_type', 'start_date')
 
         if format == 'json':
-            serializer = TherapistRateExportJSONSerializer(
+            serializer = RateExportJSONSerializer(
                 queryset,
                 many=True
             )
@@ -181,14 +181,14 @@ class TherapistRateExportView(generics.CreateAPIView):
             csv_stream = CSVStream()
             headers = [
                 'organization_id', 'type', 'period_type',
-                'start_date', 'end_date', 'rate_value'
+                'start_date', 'end_date', 'value'
             ]
 
             return csv_stream.export(
                 filename,
                 headers,
                 queryset.iterator(),
-                TherapistRateExportCSVSerializer
+                RateExportCSVSerializer
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
 
 from holistic_data_presentation.models import (
-    TherapistRate,
+    Rate,
     TotalTherapist,
 )
 
@@ -108,11 +108,11 @@ class TotalTherapistFilter(BaseFilter):
         fields = ('is_active',)
 
 
-class TherapistRateFilter(BaseFilter):
+class RateFilter(BaseFilter):
     type = filters.CharFilter(
         field_name='type'
     )
 
     class Meta:
-        model = TherapistRate
+        model = Rate
         fields = ('type',)

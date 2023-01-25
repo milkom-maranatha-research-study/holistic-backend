@@ -2,7 +2,7 @@ from django.contrib import admin
 
 
 from holistic_data_presentation.models import (
-    TherapistRate,
+    Rate,
     TotalTherapist,
 )
 
@@ -29,8 +29,8 @@ class TotalTherapistAdmin(admin.ModelAdmin):
     search_fields = ('organization__name',)
 
 
-@admin.register(TherapistRate)
-class TherapistRateAdmin(admin.ModelAdmin):
+@admin.register(Rate)
+class RateAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'organization',
@@ -38,7 +38,7 @@ class TherapistRateAdmin(admin.ModelAdmin):
         'start_date',
         'end_date',
         'type',
-        'rate_value',
+        'value',
     )
     list_filter = (
         'organization',

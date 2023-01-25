@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from holistic_data_presentation.models import (
-    TherapistRate,
+    Rate,
     TotalTherapist,
 )
 from holistic_data_presentation.validators import (
@@ -228,21 +228,21 @@ class TotalTherapistInOrgDeserializer(serializers.Serializer):
         return attrs
 
 
-class TherapistRateSerializer(serializers.ModelSerializer):
+class RateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TherapistRate
+        model = Rate
         fields = (
             'organization',
             'period_type',
             'start_date',
             'end_date',
             'type',
-            'rate_value',
+            'value',
         )
         read_only = fields
 
 
-class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
+class BaseRateBatchDeserializer(serializers.ListSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -261,8 +261,8 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
         to_update_objects = self._get_objects_to_update(list_rate, existing_rates)
         to_create_objects = self._get_objects_to_create(list_rate, existing_rates)
 
-        TherapistRate.objects.bulk_update(to_update_objects, fields=['period_type', 'rate_value'])
-        rows_created = len(TherapistRate.objects.bulk_create(to_create_objects))
+        Rate.objects.bulk_update(to_update_objects, fields=['period_type', 'value'])
+        rows_created = len(Rate.objects.bulk_create(to_create_objects))
         rows_updated = len(list_rate) - rows_created
 
         return {'rows_created': rows_created, 'rows_updated': rows_updated}
@@ -275,19 +275,19 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
 
     def _get_objects_to_create(self, list_rate, existing_rates):
         """
-        Returns a list of `TherapistRate` objects that are going to be created in batch.
+        Returns a list of `Rate` objects that are going to be created in batch.
 
         @param list_rate: Validated JSON Array that contains a list of the therapists' rates.
         @param existing_rates: Existing therapists' rates.
         """
         return [
-            TherapistRate(
+            Rate(
                 organization_id=self.organization_id,
                 type=item['type'],
                 period_type=item['period_type'],
                 start_date=item['start_date'],
                 end_date=item['end_date'],
-                rate_value=item['rate_value']
+                value=item['value']
             )
             for item in list_rate if self._is_new_item(item, existing_rates)
         ]
@@ -312,7 +312,7 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
 
     def _get_objects_to_update(self, list_rate, existing_rates):
         """
-        Returns a list of `TherapistRate` objects that are going to be updated in batch.
+        Returns a list of `Rate` objects that are going to be updated in batch.
 
         @param list_rate: Validated JSON Array that contains a list of the therapists' rates.
         @param existing_rates: Existing therapists' rates.
@@ -329,7 +329,7 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
 
             item, rate = list(pair)
             rate.period_type = item['period_type']
-            rate.rate_value = item['rate_value']
+            rate.value = item['value']
 
             objects_to_update.append(rate)
 
@@ -337,7 +337,7 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
 
     def _get_object_to_update(self, item, existing_rates):
         """
-        Returns a pair of (`item`, `TherapistRate`)
+        Returns a pair of (`item`, `Rate`)
         if the `item`'s type and period doesn't exist on the existing rates.
 
         @param item: A dictionary that represents the therapist's rate within the payload data.
@@ -354,16 +354,16 @@ class BaseTherapistRateBatchDeserializer(serializers.ListSerializer):
         return None
 
 
-class TherapistRateBatchDeserializer(BaseTherapistRateBatchDeserializer):
+class RateBatchDeserializer(BaseRateBatchDeserializer):
 
     def get_existing_rates(self):
         """
         Returns the existing `Rate` objects in NiceDay.
         """
-        return TherapistRate.objects.filter(organization__isnull=True)
+        return Rate.objects.filter(organization__isnull=True)
 
 
-class TherapistRateInOrgBatchDeserializer(BaseTherapistRateBatchDeserializer):
+class RatePerOrgBatchDeserializer(BaseRateBatchDeserializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -374,22 +374,22 @@ class TherapistRateInOrgBatchDeserializer(BaseTherapistRateBatchDeserializer):
         """
         Returns the existing `Rate` objects in the Organization.
         """
-        return TherapistRate.objects.filter(organization_id=self.organization_id)
+        return Rate.objects.filter(organization_id=self.organization_id)
 
 
-class TherapistRateDeserializer(serializers.Serializer):
+class RateDeserializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=TherapistRate.TYPE_CHOICES
+        choices=Rate.TYPE_CHOICES
     )
     period_type = serializers.ChoiceField(
-        choices=TherapistRate.PERIOD_CHOICES
+        choices=Rate.PERIOD_CHOICES
     )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
-    rate_value = serializers.FloatField()
+    value = serializers.FloatField()
 
     class Meta:
-        list_serializer_class = TherapistRateBatchDeserializer
+        list_serializer_class = RateBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -411,19 +411,19 @@ class TherapistRateDeserializer(serializers.Serializer):
         return attrs
 
 
-class TherapistRateInOrgDeserializer(serializers.Serializer):
+class RatePerOrgDeserializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=TherapistRate.TYPE_CHOICES
+        choices=Rate.TYPE_CHOICES
     )
     period_type = serializers.ChoiceField(
-        choices=TherapistRate.PERIOD_CHOICES
+        choices=Rate.PERIOD_CHOICES
     )
     start_date = serializers.DateField()
     end_date = serializers.DateField()
-    rate_value = serializers.FloatField()
+    value = serializers.FloatField()
 
     class Meta:
-        list_serializer_class = TherapistRateInOrgBatchDeserializer
+        list_serializer_class = RatePerOrgBatchDeserializer
 
     def validate(self, attrs):
         """
@@ -471,7 +471,7 @@ class TotalTherapistExportCSVSerializer(serializers.Serializer):
         ]
 
 
-class TherapistRateExportJSONSerializer(serializers.Serializer):
+class RateExportJSONSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return {
@@ -480,11 +480,11 @@ class TherapistRateExportJSONSerializer(serializers.Serializer):
             "period_type": instance.period_type,
             "start_date": instance.start_date.isoformat(),
             "end_date": instance.end_date.isoformat(),
-            "rate_value": instance.rate_value
+            "value": instance.value
         }
 
 
-class TherapistRateExportCSVSerializer(serializers.Serializer):
+class RateExportCSVSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return [
@@ -493,7 +493,7 @@ class TherapistRateExportCSVSerializer(serializers.Serializer):
             instance.period_type,
             instance.start_date.isoformat(),
             instance.end_date.isoformat(),
-            instance.rate_value
+            instance.value
         ]
 
 
